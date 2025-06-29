@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
   const [region, setRegion] = useState<Region | undefined>(undefined);
+  const [initialRegion, setInitialRegion] = useState<Region | undefined>(undefined);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -36,14 +37,14 @@ export default function HomeScreen() {
 
       let location = await Location.getCurrentPositionAsync({});
       setUserLocation(location);
-      const initialRegion = {
+      const userRegion = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
       };
-      setRegion(initialRegion);
-      mapViewRef.current?.animateToRegion(initialRegion, 1000);
+      setInitialRegion(userRegion);
+      setRegion(userRegion); // Set region for initial data fetching
     })();
   }, []);
 
@@ -64,7 +65,7 @@ export default function HomeScreen() {
       <MapView
         ref={mapViewRef}
         style={styles.map}
-        region={region}
+        initialRegion={initialRegion}
         onRegionChangeComplete={setRegion}
         showsUserLocation={true}
       >
