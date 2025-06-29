@@ -1,5 +1,6 @@
 import StationMarker from '@/components/StationMarker';
 import { useChargingStations } from '@/hooks/useChargingStations';
+import { useCurrentAddress } from '@/hooks/useCurrentAddress';
 import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -20,7 +21,10 @@ export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
 
   // Use our custom hook for charging stations data
-  const { chargingStations, isLoading, error } = useChargingStations(region);
+  const { chargingStations } = useChargingStations(region);
+  
+  // Use our custom hook for current address
+  const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
 
   useEffect(() => {
     (async () => {
@@ -82,7 +86,7 @@ export default function HomeScreen() {
         />
         <TextInput
           style={[styles.searchInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
-          placeholder="Ionity, Nempitz, Germany"
+          placeholder={currentAddress || 'Ionity, Nempitz, Germany'}
           placeholderTextColor={colorScheme === 'dark' ? '#E5E5E7' : '#3C3C43'}
           value={searchQuery}
           onChangeText={setSearchQuery}
