@@ -1,5 +1,6 @@
 import { ChargingStation, convertPlugsurfingToChargingStation } from '@/api/converters';
 import { fetchChargingLocations } from '@/api/plugsurfing';
+import StationMarker from '@/components/StationMarker';
 import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -7,8 +8,8 @@ import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
-import MapView, { Marker, Region } from 'react-native-maps';
+import { StyleSheet, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import MapView, { Region } from 'react-native-maps';
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
@@ -75,14 +76,7 @@ export default function HomeScreen() {
         showsUserLocation={true}
       >
         {chargingStations.map(station => (
-          <Marker
-            key={station.id}
-            coordinate={station.coordinates}
-            tracksViewChanges={false}
-            centerOffset={{ x: 0, y: -16 }} // Adjust anchor to move marker up
-          >
-            <StationMarker power={station.power} />
-          </Marker>
+          <StationMarker key={station.id} station={station} />
         ))}
       </MapView>
 
@@ -122,19 +116,6 @@ export default function HomeScreen() {
   );
 }
 
-// Custom marker component for power display
-const StationMarker = ({ power }: { power: string; }) => {
-  return (
-    <View style={styles.markerWrapper}>
-      <View style={styles.markerContainer}>
-        <Ionicons name="flash" size={10} color="white" style={{ marginRight: 4 }} />
-        <Text style={styles.markerText}>{power}</Text>
-      </View>
-      <View style={styles.markerPin} />
-    </View>
-  );
-  };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -161,67 +142,6 @@ const styles = StyleSheet.create({
   },
   locationButtonBlur: {
     padding: 10,
-  },
-  markerWrapper: {
-    alignItems: 'center',
-  },
-  markerContainer: {
-    backgroundColor: 'black',
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderCurve: 'continuous',
-  },
-  markerText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  markerPin: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 6,
-    borderRightWidth: 6,
-    borderTopWidth: 10,
-    borderStyle: 'solid',
-    backgroundColor: 'transparent',
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: 'black',
-    alignSelf: 'center',
-    marginTop: -1, // Overlap with the container for a seamless look
-  },
-  calloutContainer: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    width: 180,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  calloutTitle: {
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  calloutDetail: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  calloutLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  calloutValue: {
-    fontSize: 12,
-    fontWeight: '600',
   },
   searchContainer: {
     position: 'absolute',
