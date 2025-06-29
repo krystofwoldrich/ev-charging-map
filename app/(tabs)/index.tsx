@@ -1,6 +1,5 @@
-import { ChargingStation, convertPlugsurfingToChargingStation } from '@/api/converters';
-import { fetchChargingLocations } from '@/api/plugsurfing';
 import StationMarker from '@/components/StationMarker';
+import { useChargingStations } from '@/hooks/useChargingStations';
 import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -16,17 +15,18 @@ export default function HomeScreen() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [chargingStations, setChargingStations] = useState<ChargingStation[]>([]);
 
   const colorScheme = useColorScheme();
   const tabBarHeight = useBottomTabBarHeight();
+
+  // Use our custom hook for charging stations data
+  const { chargingStations, isLoading, error } = useChargingStations(region);
 
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
+        console.error('Permission to access location was denied');
         return;
       }
 
@@ -42,17 +42,6 @@ export default function HomeScreen() {
       mapViewRef.current?.animateToRegion(initialRegion, 1000);
     })();
   }, []);
-
-  useEffect(() => {
-    const loadData = async () => {
-      if (region) {
-        const locations = await fetchChargingLocations(region);
-        const stations = convertPlugsurfingToChargingStation(locations);
-        setChargingStations(stations);
-      }
-    };
-    loadData();
-  }, [region]);
 
   const goToMyLocation = () => {
     if (userLocation) {

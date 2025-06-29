@@ -12,6 +12,7 @@ export interface ChargingStation {
   unit?: string;
   availability: string;
   power: string;
+  lastUpdated?: number;
 }
 
 export const convertPlugsurfingToChargingStation = (locations: PlugsurfingLocation[]): ChargingStation[] => {
