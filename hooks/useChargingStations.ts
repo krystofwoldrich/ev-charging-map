@@ -1,10 +1,47 @@
 import { ChargingStation, convertPlugsurfingToChargingStation } from '@/api/converters';
 import { fetchChargingLocations } from '@/api/plugsurfing';
+import { extractLowestPrice, fetchStationDetails } from '@/api/stationDetails';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Region } from 'react-native-maps';
 
 export const useChargingStations = (region: Region | undefined) => {
   const queryClient = useQueryClient();
+
+  // Function to fetch pricing for a specific station
+  const fetchStationPrice = async (stationId: string): Promise<void> => {
+    // Check if we already have pricing info
+    const existingStation = queryClient.getQueryData<Map<string, ChargingStation>>(['allStations'])?.get(stationId);
+    if (existingStation?.hasPriceInfo) {
+      return; // Skip if we already have pricing info
+    }
+
+    try {
+      // Fetch detailed station info for pricing
+      const detailsResult = await fetchStationDetails(stationId);
+      if (detailsResult) {
+        const priceInfo = extractLowestPrice(detailsResult);
+        
+        // Update the cache with pricing information
+        queryClient.setQueryData<Map<string, ChargingStation>>(['allStations'], (oldData) => {
+          if (!oldData) return oldData;
+          const updatedStation = oldData.get(stationId);
+          if (updatedStation) {
+            oldData.set(stationId, {
+              ...updatedStation,
+              price: priceInfo?.price,
+              currency: priceInfo?.currency,
+              priceType: priceInfo?.type,
+              hasPriceInfo: true,
+              lastUpdated: Date.now(),
+            });
+          }
+          return new Map(oldData);
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching station price:', error);
+    }
+  };
 
   // This query fetches data for the current region and merges it into a master list
   const { isLoading, error } = useQuery({
@@ -20,9 +57,17 @@ export const useChargingStations = (region: Region | undefined) => {
       queryClient.setQueryData<Map<string, ChargingStation>>(['allStations'], (oldData) => {
         const stationMap = oldData || new Map<string, ChargingStation>();
         newStations.forEach(station => {
-          // Add timestamp to track when the station was last updated
+          // Check if we already have detailed pricing info for this station
+          const existingStation = stationMap.get(station.id);
           const stationWithTimestamp = {
             ...station,
+            // Preserve existing price info if available
+            ...(existingStation?.hasPriceInfo && {
+              price: existingStation.price,
+              currency: existingStation.currency,
+              priceType: existingStation.priceType,
+              hasPriceInfo: existingStation.hasPriceInfo,
+            }),
             lastUpdated: Date.now(),
           };
           stationMap.set(station.id, stationWithTimestamp);
@@ -52,5 +97,6 @@ export const useChargingStations = (region: Region | undefined) => {
     chargingStations,
     isLoading,
     error,
+    fetchStationPrice,
   };
 };

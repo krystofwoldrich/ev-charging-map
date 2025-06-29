@@ -22,7 +22,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   // Use our custom hook for charging stations data
-  const { chargingStations, isLoading } = useChargingStations(region);
+  const { chargingStations, isLoading, fetchStationPrice } = useChargingStations(region);
   
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
@@ -70,7 +70,7 @@ export default function HomeScreen() {
         showsUserLocation={true}
       >
         {chargingStations.map(station => (
-          <StationMarker key={station.id} station={station} />
+          <StationMarker key={station.id} station={station} onPress={fetchStationPrice} />
         ))}
       </MapView>
 

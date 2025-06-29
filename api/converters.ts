@@ -7,12 +7,14 @@ export interface ChargingStation {
     longitude: number;
   };
   title: string;
-  price?: string;
+  price?: number;
   currency?: string;
+  priceType?: string;
   unit?: string;
   availability: string;
   power: string;
   lastUpdated?: number;
+  hasPriceInfo?: boolean;
 }
 
 export const convertPlugsurfingToChargingStation = (locations: PlugsurfingLocation[]): ChargingStation[] => {
