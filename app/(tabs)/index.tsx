@@ -12,7 +12,7 @@ import MapView, { Marker, Region } from 'react-native-maps';
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
-  const [region, setRegion] = useState<Region | null>(null);
+  const [region, setRegion] = useState<Region | undefined>(undefined);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -79,6 +79,7 @@ export default function HomeScreen() {
             key={station.id}
             coordinate={station.coordinates}
             tracksViewChanges={false}
+            centerOffset={{ x: 0, y: -16 }} // Adjust anchor to move marker up
           >
             <StationMarker power={station.power} />
           </Marker>
