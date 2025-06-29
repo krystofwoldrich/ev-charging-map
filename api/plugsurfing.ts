@@ -33,10 +33,10 @@ export interface PlugsurfingLocation {
 export const fetchChargingLocations = async (region: Region): Promise<PlugsurfingLocation[]> => {
   const { latitude, longitude, latitudeDelta, longitudeDelta } = region;
 
-  const topLatitude = latitude + latitudeDelta / 2;
-  const bottomLatitude = latitude - latitudeDelta / 2;
-  const leftLongitude = longitude - longitudeDelta / 2;
-  const rightLongitude = longitude + longitudeDelta / 2;
+  const topLatitude = latitude + latitudeDelta;
+  const bottomLatitude = latitude - latitudeDelta;
+  const leftLongitude = longitude - longitudeDelta;
+  const rightLongitude = longitude + longitudeDelta;
 
   try {
     const response = await fetch(API_URL, {
