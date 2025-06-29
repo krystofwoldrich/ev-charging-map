@@ -64,19 +64,6 @@ export default function HomeScreen() {
     }
   };
 
-  // Custom marker component for power display
-  const StationMarker = ({ power }: { power: string; }) => {
-    return (
-      <View style={styles.markerWrapper}>
-        <View style={styles.markerContainer}>
-          <Ionicons name="flash" size={14} color="white" style={{ marginRight: 4 }} />
-          <Text style={styles.markerText}>{power}</Text>
-        </View>
-        <View style={styles.markerPin} />
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -92,7 +79,6 @@ export default function HomeScreen() {
             key={station.id}
             coordinate={station.coordinates}
             tracksViewChanges={false}
-            anchor={{ x: 0.5, y: 1 }} // Anchor to the bottom center
           >
             <StationMarker power={station.power} />
           </Marker>
@@ -134,6 +120,19 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+// Custom marker component for power display
+const StationMarker = ({ power }: { power: string; }) => {
+  return (
+    <View style={styles.markerWrapper}>
+      <View style={styles.markerContainer}>
+        <Ionicons name="flash" size={10} color="white" style={{ marginRight: 4 }} />
+        <Text style={styles.markerText}>{power}</Text>
+      </View>
+      <View style={styles.markerPin} />
+    </View>
+  );
+  };
 
 const styles = StyleSheet.create({
   container: {
