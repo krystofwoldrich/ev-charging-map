@@ -1,75 +1,317 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Ionicons } from '@expo/vector-icons';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { BlurView } from 'expo-blur';
+import Constants from 'expo-constants';
+import * as Location from 'expo-location';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useRef, useState } from 'react';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import MapView, { Callout, Marker, Region } from 'react-native-maps';
 
 export default function HomeScreen() {
+  const mapViewRef = useRef<MapView>(null);
+  const [region, setRegion] = useState<Region>({
+    latitude: 37.7749,
+    longitude: -122.4194,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+  const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const colorScheme = useColorScheme();
+  const tabBarHeight = useBottomTabBarHeight();
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission to access location was denied');
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setUserLocation(location);
+      setRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
+  }, []);
+  
+  const goToMyLocation = () => {
+    if (userLocation) {
+      mapViewRef.current?.animateToRegion({
+        latitude: userLocation.coords.latitude,
+        longitude: userLocation.coords.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      }, 1000); // 1000ms animation duration
+    }
+  };
+
+  // EV charging station data
+  const [chargingStations, setChargingStations] = useState<{
+    id: string;
+    coordinates: { latitude: number; longitude: number };
+    title: string;
+    price: string;
+    currency: string;
+    unit: string;
+    availability: string;
+    power: string;
+  }[]>([]);
+
+  useEffect(() => {
+    // Fetch or load charging stations data
+    // This could be replaced with an API call in a real app
+    const loadChargingStations = () => {
+      const stationsData = [
+        {
+          id: '1',
+          coordinates: { latitude: 37.7749, longitude: -122.4194 },
+          title: 'Downtown Charging Hub',
+          price: '12.99',
+          currency: '$',
+          unit: 'hr',
+          availability: '3/5 available',
+          power: '150 kW'
+        },
+        {
+          id: '2',
+          coordinates: { latitude: 37.7833, longitude: -122.4167 },
+          title: 'Union Square Chargers',
+          price: '9.50',
+          currency: '$',
+          unit: 'hr',
+          availability: '1/4 available',
+          power: '50 kW'
+        },
+        {
+          id: '3',
+          coordinates: { latitude: 37.7694, longitude: -122.4862 },
+          title: 'Ocean Beach Station',
+          price: '7.25',
+          currency: '$',
+          unit: 'hr',
+          availability: '5/5 available',
+          power: '75 kW'
+        },
+        {
+          id: '4',
+          coordinates: { latitude: 37.7875, longitude: -122.4324 },
+          title: 'Waterfront Charging',
+          price: '10.75',
+          currency: '$',
+          unit: 'hr',
+          availability: '2/6 available',
+          power: '100 kW'
+        }
+      ];
+      
+      setChargingStations(stationsData);
+    };
+
+    loadChargingStations();
+  }, []);
+  
+  // Custom marker component for price display
+  const PriceMarker = ({ price }: { price: string; }) => {
+    return (
+      <View style={styles.markerWrapper}>
+        <View style={styles.markerContainer}>
+          <Ionicons name="flash" size={14} color="white" style={{ marginRight: 2 }} />
+          <Text style={styles.markerText}>{price}</Text>
+        </View>
+        <View style={styles.markerPin} />
+      </View>
+    );
+  };
+  
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <StatusBar style="dark" />
+      <MapView 
+        ref={mapViewRef}
+        style={styles.map}
+        region={region}
+        onRegionChangeComplete={setRegion}
+        showsUserLocation={true}
+      >
+        {chargingStations.map(station => (
+          <Marker
+            key={station.id}
+            coordinate={station.coordinates}
+            tracksViewChanges={false}
+            anchor={{ x: 0.5, y: 1 }} // Anchor to the bottom center
+          >
+            <PriceMarker price={station.price} />
+            <Callout tooltip>
+              <View style={styles.calloutContainer}>
+                <Text style={styles.calloutTitle}>{station.title}</Text>
+                <View style={styles.calloutDetail}>
+                  <Text style={styles.calloutLabel}>Price:</Text>
+                  <Text style={styles.calloutValue}>{`${station.currency}${station.price}/${station.unit}`}</Text>
+                </View>
+                <View style={styles.calloutDetail}>
+                  <Text style={styles.calloutLabel}>Power:</Text>
+                  <Text style={styles.calloutValue}>{station.power}</Text>
+                </View>
+                <View style={styles.calloutDetail}>
+                  <Text style={styles.calloutLabel}>Status:</Text>
+                  <Text style={styles.calloutValue}>{station.availability}</Text>
+                </View>
+              </View>
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
+
+      <BlurView 
+        intensity={90} 
+        tint={colorScheme === 'dark' ? 'dark' : 'light'} 
+        style={styles.searchContainer}
+      >
+        <Ionicons 
+          name="search" 
+          size={20} 
+          color={colorScheme === 'dark' ? '#E5E5E7' : '#3C3C43'} 
+          style={styles.searchIcon} 
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+        <TextInput
+          style={[styles.searchInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
+          placeholder="Ionity, Nempitz, Germany"
+          placeholderTextColor={colorScheme === 'dark' ? '#E5E5E7' : '#3C3C43'}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </BlurView>
+
+      <TouchableOpacity 
+        style={[styles.locationButton, { bottom: tabBarHeight + 20 }]}
+        onPress={goToMyLocation}
+      >
+        <BlurView 
+          intensity={90} 
+          tint={colorScheme === 'dark' ? 'dark' : 'light'}
+          style={styles.locationButtonBlur}
+        >
+          <Ionicons name={"navigate"} size={24} color={colorScheme === 'dark' ? 'white' : '#007AFF'} />
+        </BlurView>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  map: {
+    width: '100%',
+    height: '100%',
+  },
+  locationButton: {
+    position: 'absolute',
+    right: 20,
+    borderRadius: 10,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderCurve: 'continuous',
+  },
+  locationButtonBlur: {
+    padding: 10,
+  },
+  markerWrapper: {
+    alignItems: 'center',
+  },
+  markerContainer: {
+    backgroundColor: 'black',
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    borderCurve: 'continuous',
   },
-  stepContainer: {
-    gap: 8,
+  markerText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  markerPin: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 10,
+    borderStyle: 'solid',
+    backgroundColor: 'transparent',
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: 'black',
+    alignSelf: 'center',
+    marginTop: -1, // Overlap with the container for a seamless look
+  },
+  calloutContainer: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 12,
+    width: 180,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  calloutTitle: {
+    fontWeight: 'bold',
+    fontSize: 14,
     marginBottom: 8,
+    textAlign: 'center',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  calloutDetail: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  calloutLabel: {
+    fontSize: 12,
+    color: '#666',
+  },
+  calloutValue: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  searchContainer: {
     position: 'absolute',
+    top: Constants.statusBarHeight + 15,
+    left: 15,
+    right: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    height: 50,
+    overflow: 'hidden', // Important for BlurView border radius
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: 'black',
+    fontSize: 16,
   },
 });
