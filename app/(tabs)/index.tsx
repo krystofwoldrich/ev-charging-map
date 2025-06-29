@@ -8,7 +8,7 @@ import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
-import MapView, { Callout, Marker, Region } from 'react-native-maps';
+import MapView, { Marker, Region } from 'react-native-maps';
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
@@ -95,19 +95,6 @@ export default function HomeScreen() {
             anchor={{ x: 0.5, y: 1 }} // Anchor to the bottom center
           >
             <StationMarker power={station.power} />
-            <Callout tooltip>
-              <View style={styles.calloutContainer}>
-                <Text style={styles.calloutTitle}>{station.title}</Text>
-                <View style={styles.calloutDetail}>
-                  <Text style={styles.calloutLabel}>Power:</Text>
-                  <Text style={styles.calloutValue}>{station.power}</Text>
-                </View>
-                <View style={styles.calloutDetail}>
-                  <Text style={styles.calloutLabel}>Status:</Text>
-                  <Text style={styles.calloutValue}>{station.availability}</Text>
-                </View>
-              </View>
-            </Callout>
           </Marker>
         ))}
       </MapView>
