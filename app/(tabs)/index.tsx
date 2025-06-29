@@ -8,7 +8,7 @@ import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, View, useColorScheme, ActivityIndicator } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
 
 export default function HomeScreen() {
@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
 
   // Use our custom hook for charging stations data
-  const { chargingStations } = useChargingStations(region);
+  const { chargingStations, isLoading } = useChargingStations(region);
   
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
@@ -105,6 +105,21 @@ export default function HomeScreen() {
           <Ionicons name={"navigate"} size={24} color={colorScheme === 'dark' ? 'white' : '#007AFF'} />
         </BlurView>
       </TouchableOpacity>
+
+      {isLoading && (
+        <View style={[styles.loadingContainer, { bottom: tabBarHeight + 20 }]}>
+          <BlurView
+            intensity={90}
+            tint={colorScheme === 'dark' ? 'dark' : 'light'}
+            style={styles.loadingBlur}
+          >
+            <ActivityIndicator 
+              size="small" 
+              color={colorScheme === 'dark' ? 'white' : '#007AFF'} 
+            />
+          </BlurView>
+        </View>
+      )}
     </View>
   );
 }
@@ -134,6 +149,24 @@ const styles = StyleSheet.create({
     borderCurve: 'continuous',
   },
   locationButtonBlur: {
+    padding: 10,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    left: 20,
+    borderRadius: 10,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderCurve: 'continuous',
+  },
+  loadingBlur: {
     padding: 10,
   },
   searchContainer: {
