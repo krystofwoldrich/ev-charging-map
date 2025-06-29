@@ -1,3 +1,5 @@
+import { ChargingStation, convertPlugsurfingToChargingStation } from '@/api/converters';
+import { fetchChargingLocations } from '@/api/plugsurfing';
 import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -10,15 +12,11 @@ import MapView, { Callout, Marker, Region } from 'react-native-maps';
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
-  const [region, setRegion] = useState<Region>({
-    latitude: 37.7749,
-    longitude: -122.4194,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
+  const [region, setRegion] = useState<Region | null>(null);
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [chargingStations, setChargingStations] = useState<ChargingStation[]>([]);
 
   const colorScheme = useColorScheme();
   const tabBarHeight = useBottomTabBarHeight();
@@ -33,15 +31,28 @@ export default function HomeScreen() {
 
       let location = await Location.getCurrentPositionAsync({});
       setUserLocation(location);
-      setRegion({
+      const initialRegion = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         latitudeDelta: 0.0922,
         longitudeDelta: 0.0421,
-      });
+      };
+      setRegion(initialRegion);
+      mapViewRef.current?.animateToRegion(initialRegion, 1000);
     })();
   }, []);
-  
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (region) {
+        const locations = await fetchChargingLocations(region);
+        const stations = convertPlugsurfingToChargingStation(locations);
+        setChargingStations(stations);
+      }
+    };
+    loadData();
+  }, [region]);
+
   const goToMyLocation = () => {
     if (userLocation) {
       mapViewRef.current?.animateToRegion({
@@ -53,88 +64,23 @@ export default function HomeScreen() {
     }
   };
 
-  // EV charging station data
-  const [chargingStations, setChargingStations] = useState<{
-    id: string;
-    coordinates: { latitude: number; longitude: number };
-    title: string;
-    price: string;
-    currency: string;
-    unit: string;
-    availability: string;
-    power: string;
-  }[]>([]);
-
-  useEffect(() => {
-    // Fetch or load charging stations data
-    // This could be replaced with an API call in a real app
-    const loadChargingStations = () => {
-      const stationsData = [
-        {
-          id: '1',
-          coordinates: { latitude: 37.7749, longitude: -122.4194 },
-          title: 'Downtown Charging Hub',
-          price: '12.99',
-          currency: '$',
-          unit: 'hr',
-          availability: '3/5 available',
-          power: '150 kW'
-        },
-        {
-          id: '2',
-          coordinates: { latitude: 37.7833, longitude: -122.4167 },
-          title: 'Union Square Chargers',
-          price: '9.50',
-          currency: '$',
-          unit: 'hr',
-          availability: '1/4 available',
-          power: '50 kW'
-        },
-        {
-          id: '3',
-          coordinates: { latitude: 37.7694, longitude: -122.4862 },
-          title: 'Ocean Beach Station',
-          price: '7.25',
-          currency: '$',
-          unit: 'hr',
-          availability: '5/5 available',
-          power: '75 kW'
-        },
-        {
-          id: '4',
-          coordinates: { latitude: 37.7875, longitude: -122.4324 },
-          title: 'Waterfront Charging',
-          price: '10.75',
-          currency: '$',
-          unit: 'hr',
-          availability: '2/6 available',
-          power: '100 kW'
-        }
-      ];
-      
-      setChargingStations(stationsData);
-    };
-
-    loadChargingStations();
-  }, []);
-  
-  // Custom marker component for price display
-  const PriceMarker = ({ price }: { price: string; }) => {
+  // Custom marker component for power display
+  const StationMarker = ({ power }: { power: string; }) => {
     return (
       <View style={styles.markerWrapper}>
         <View style={styles.markerContainer}>
-          <Ionicons name="flash" size={14} color="white" style={{ marginRight: 2 }} />
-          <Text style={styles.markerText}>{price}</Text>
+          <Ionicons name="flash" size={14} color="white" style={{ marginRight: 4 }} />
+          <Text style={styles.markerText}>{power}</Text>
         </View>
         <View style={styles.markerPin} />
       </View>
     );
   };
-  
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <MapView 
+      <MapView
         ref={mapViewRef}
         style={styles.map}
         region={region}
@@ -148,14 +94,10 @@ export default function HomeScreen() {
             tracksViewChanges={false}
             anchor={{ x: 0.5, y: 1 }} // Anchor to the bottom center
           >
-            <PriceMarker price={station.price} />
+            <StationMarker power={station.power} />
             <Callout tooltip>
               <View style={styles.calloutContainer}>
                 <Text style={styles.calloutTitle}>{station.title}</Text>
-                <View style={styles.calloutDetail}>
-                  <Text style={styles.calloutLabel}>Price:</Text>
-                  <Text style={styles.calloutValue}>{`${station.currency}${station.price}/${station.unit}`}</Text>
-                </View>
                 <View style={styles.calloutDetail}>
                   <Text style={styles.calloutLabel}>Power:</Text>
                   <Text style={styles.calloutValue}>{station.power}</Text>
@@ -170,16 +112,16 @@ export default function HomeScreen() {
         ))}
       </MapView>
 
-      <BlurView 
-        intensity={90} 
-        tint={colorScheme === 'dark' ? 'dark' : 'light'} 
+      <BlurView
+        intensity={90}
+        tint={colorScheme === 'dark' ? 'dark' : 'light'}
         style={styles.searchContainer}
       >
-        <Ionicons 
-          name="search" 
-          size={20} 
-          color={colorScheme === 'dark' ? '#E5E5E7' : '#3C3C43'} 
-          style={styles.searchIcon} 
+        <Ionicons
+          name="search"
+          size={20}
+          color={colorScheme === 'dark' ? '#E5E5E7' : '#3C3C43'}
+          style={styles.searchIcon}
         />
         <TextInput
           style={[styles.searchInput, { color: colorScheme === 'dark' ? 'white' : 'black' }]}
@@ -190,12 +132,12 @@ export default function HomeScreen() {
         />
       </BlurView>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={[styles.locationButton, { bottom: tabBarHeight + 20 }]}
         onPress={goToMyLocation}
       >
-        <BlurView 
-          intensity={90} 
+        <BlurView
+          intensity={90}
           tint={colorScheme === 'dark' ? 'dark' : 'light'}
           style={styles.locationButtonBlur}
         >
