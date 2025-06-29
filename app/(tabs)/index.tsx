@@ -2,14 +2,14 @@ import StationMarker from '@/components/StationMarker';
 import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
 import { Ionicons } from '@expo/vector-icons';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, useColorScheme, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
@@ -18,7 +18,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const colorScheme = useColorScheme();
-  const tabBarHeight = useBottomTabBarHeight();
+  const insets = useSafeAreaInsets();
 
   // Use our custom hook for charging stations data
   const { chargingStations, isLoading } = useChargingStations(region);
@@ -94,7 +94,7 @@ export default function HomeScreen() {
       </BlurView>
 
       <TouchableOpacity
-        style={[styles.locationButton, { bottom: tabBarHeight + 20 }]}
+        style={[styles.locationButton, { bottom: insets.bottom + BOTTOM_OFFSET }]}
         onPress={goToMyLocation}
       >
         <BlurView
@@ -107,7 +107,7 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       {isLoading && (
-        <View style={[styles.loadingContainer, { bottom: tabBarHeight + 20 }]}>
+        <View style={[styles.loadingContainer, { bottom: insets.bottom + BOTTOM_OFFSET }]}>
           <BlurView
             intensity={90}
             tint={colorScheme === 'dark' ? 'dark' : 'light'}
@@ -123,6 +123,8 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+const BOTTOM_OFFSET = 30; // Adjust as needed for your design
 
 const styles = StyleSheet.create({
   container: {
