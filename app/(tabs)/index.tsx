@@ -40,8 +40,8 @@ export default function HomeScreen() {
       const userRegion = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitudeDelta: 0.02, // Smaller value for more zoom
+        longitudeDelta: 0.01, // Smaller value for more zoom
       };
       setInitialRegion(userRegion);
       setRegion(userRegion); // Set region for initial data fetching
