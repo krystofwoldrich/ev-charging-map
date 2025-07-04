@@ -1,6 +1,7 @@
 import StationMarker from '@/components/StationMarker';
 import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
+import { shouldFetchStationDetail } from '@/utils/mapHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
@@ -26,6 +27,8 @@ export default function HomeScreen() {
 
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
+
+  const shouldFetchPrices = region ? shouldFetchStationDetail(region.latitudeDelta) : false;
 
   useEffect(() => {
     (async () => {
@@ -70,7 +73,11 @@ export default function HomeScreen() {
         showsUserLocation={true}
       >
         {chargingStations.map(station => (
-          <StationMarker key={station.id} station={station} />
+          <StationMarker
+            key={station.id}
+            station={station}
+            shouldFetchPrice={shouldFetchPrices}
+          />
         ))}
       </MapView>
 

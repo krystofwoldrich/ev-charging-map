@@ -7,14 +7,16 @@ import { Marker } from 'react-native-maps';
 
 interface StationMarkerProps {
   station: ChargingStation;
+  shouldFetchPrice: boolean;
+  onPress?: (stationId: string) => void;
 }
 
-const StationMarker = ({ station }: StationMarkerProps) => {
-  const { data: priceInfo } = useStationPrice(station.id);
+const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProps) => {
+  const { data: priceInfo } = useStationPrice(station.id, shouldFetchPrice);
 
   // Determine what to display in the marker
-  let displayText: string = '...';
-  if (priceInfo && priceInfo.price !== undefined) {
+  let displayText: string = '';
+  if (shouldFetchPrice && priceInfo && priceInfo.price !== undefined) {
     const price = priceInfo.price.toFixed(2);
     const currency = priceInfo.currency;
     const priceType = priceInfo.type;
@@ -33,8 +35,9 @@ const StationMarker = ({ station }: StationMarkerProps) => {
     <Marker
       coordinate={station.coordinates}
       centerOffset={{ x: 0, y: -15 }}
-      identifier={`${station.id}-${displayText}`}
-      key={`${station.id}-${displayText}`}
+      identifier={station.id}
+      onPress={() => onPress?.(station.id)}
+      tracksViewChanges={false}
     >
       <View style={styles.markerWrapper}>
         <View style={[
@@ -93,7 +96,9 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(StationMarker,   // Custom equality function for memo - only check the ID
+export default memo(StationMarker,
+  // Custom equality function for memo - check ID and shouldFetchPrice
   (prevProps, nextProps) => {
-    return prevProps.station.id === nextProps.station.id;
+    return prevProps.station.id === nextProps.station.id &&
+           prevProps.shouldFetchPrice === nextProps.shouldFetchPrice;
   });

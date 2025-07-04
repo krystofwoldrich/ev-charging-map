@@ -1,7 +1,7 @@
 import { extractLowestPrice, fetchStationDetails } from '@/api/stationDetails';
 import { useQuery } from '@tanstack/react-query';
 
-export function useStationPrice(stationId: string | undefined) {
+export function useStationPrice(stationId: string | undefined, shouldFetch: boolean = false) {
   return useQuery({
     queryKey: ['stationPrice', stationId],
     queryFn: async () => {
@@ -10,7 +10,8 @@ export function useStationPrice(stationId: string | undefined) {
       if (!details) return null;
       return extractLowestPrice(details);
     },
-    enabled: !!stationId,
+    // Only enabled if we have a stationId AND shouldFetch is true
+    enabled: !!stationId && shouldFetch,
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 }
