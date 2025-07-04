@@ -22,8 +22,8 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   // Use our custom hook for charging stations data
-  const { chargingStations, isLoading, fetchStationPrice } = useChargingStations(region);
-  
+  const { chargingStations, isLoading } = useChargingStations(region);
+
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
 
@@ -70,7 +70,7 @@ export default function HomeScreen() {
         showsUserLocation={true}
       >
         {chargingStations.map(station => (
-          <StationMarker key={station.id} station={station} onPress={fetchStationPrice} />
+          <StationMarker key={station.id} station={station} />
         ))}
       </MapView>
 
@@ -114,9 +114,9 @@ export default function HomeScreen() {
             tint={colorScheme === 'dark' ? 'dark' : 'light'}
             style={styles.loadingBlur}
           >
-            <ActivityIndicator 
-              size="small" 
-              color={colorScheme === 'dark' ? 'white' : '#007AFF'} 
+            <ActivityIndicator
+              size="small"
+              color={colorScheme === 'dark' ? 'white' : '#007AFF'}
             />
           </BlurView>
         </View>

@@ -7,10 +7,9 @@ import { Marker } from 'react-native-maps';
 
 interface StationMarkerProps {
   station: ChargingStation;
-  onPress?: (stationId: string) => void;
 }
 
-const StationMarker = ({ station, onPress }: StationMarkerProps) => {
+const StationMarker = ({ station }: StationMarkerProps) => {
   const { data: priceInfo } = useStationPrice(station.id);
 
   // Determine what to display in the marker
@@ -33,7 +32,6 @@ const StationMarker = ({ station, onPress }: StationMarkerProps) => {
   return (
     <Marker
       coordinate={station.coordinates}
-      tracksViewChanges={false}
       centerOffset={{ x: 0, y: -15 }}
       identifier={`${station.id}-${displayText}`}
       key={`${station.id}-${displayText}`}
@@ -43,11 +41,11 @@ const StationMarker = ({ station, onPress }: StationMarkerProps) => {
           styles.markerContainer,
           !displayText && styles.markerContainerIconOnly
         ]}>
-          <Ionicons 
-            name="flash" 
-            size={displayText ? 10 : 16} 
-            color="white" 
-            style={displayText ? { marginRight: 4 } : undefined} 
+          <Ionicons
+            name="flash"
+            size={displayText ? 10 : 16}
+            color="white"
+            style={displayText ? { marginRight: 4 } : undefined}
           />
           <Text style={styles.markerText}>{displayText}</Text>
         </View>
