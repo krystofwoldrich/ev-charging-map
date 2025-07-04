@@ -1,6 +1,7 @@
 import { ChargingStation } from '@/api/converters';
+import { useStationPrice } from '@/hooks/useStationPrice';
 import { Ionicons } from '@expo/vector-icons';
-import React from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 
@@ -10,16 +11,14 @@ interface StationMarkerProps {
 }
 
 const StationMarker = ({ station, onPress }: StationMarkerProps) => {
+  const { data: priceInfo } = useStationPrice(station.id);
+
   // Determine what to display in the marker
-  const hasPrice = station.hasPriceInfo && station.price !== undefined;
-  
-  let displayText: string | null = null;
-  if (hasPrice && station.price !== undefined) {
-    const price = station.price.toFixed(2);
-    const currency = station.currency;
-    const priceType = station.priceType;
-    
-    // Add appropriate units based on price type
+  let displayText: string = '...';
+  if (priceInfo && priceInfo.price !== undefined) {
+    const price = priceInfo.price.toFixed(2);
+    const currency = priceInfo.currency;
+    const priceType = priceInfo.type;
     if (priceType === 'ENERGY') {
       displayText = `${price} ${currency}/kWh`;
     } else if (priceType === 'TIME') {
@@ -35,13 +34,14 @@ const StationMarker = ({ station, onPress }: StationMarkerProps) => {
     <Marker
       coordinate={station.coordinates}
       tracksViewChanges={false}
-      centerOffset={{ x: 0, y: -15 }} // Fine-tuned offset
-      onPress={() => onPress?.(station.id)}
+      centerOffset={{ x: 0, y: -15 }}
+      identifier={`${station.id}-${displayText}`}
+      key={`${station.id}-${displayText}`}
     >
       <View style={styles.markerWrapper}>
         <View style={[
           styles.markerContainer,
-          !displayText && styles.markerContainerIconOnly // Smaller container when no text
+          !displayText && styles.markerContainerIconOnly
         ]}>
           <Ionicons 
             name="flash" 
@@ -49,9 +49,7 @@ const StationMarker = ({ station, onPress }: StationMarkerProps) => {
             color="white" 
             style={displayText ? { marginRight: 4 } : undefined} 
           />
-          {displayText && (
-            <Text style={styles.markerText}>{displayText}</Text>
-          )}
+          <Text style={styles.markerText}>{displayText}</Text>
         </View>
         <View style={styles.markerPin} />
       </View>
@@ -97,4 +95,7 @@ const styles = StyleSheet.create({
   },
 });
 
-export default StationMarker;
+export default memo(StationMarker,   // Custom equality function for memo - only check the ID
+  (prevProps, nextProps) => {
+    return prevProps.station.id === nextProps.station.id;
+  });
