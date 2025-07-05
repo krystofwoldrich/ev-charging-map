@@ -7,7 +7,7 @@ export const useChargingStations = (region: Region | undefined) => {
   const queryClient = useQueryClient();
 
   // This query fetches data for the current region and merges it into a master list
-  const { isLoading, error } = useQuery({
+  const { isLoading, error, isError } = useQuery({
     // The queryKey includes the region, so it refetches when the map moves
     queryKey: ['chargingStations', region],
     queryFn: async () => {
@@ -59,6 +59,7 @@ export const useChargingStations = (region: Region | undefined) => {
   return {
     chargingStations,
     isLoading,
+    isError,
     error,
   };
 };

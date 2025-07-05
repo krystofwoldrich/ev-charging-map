@@ -23,7 +23,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   // Use our custom hook for charging stations data
-  const { chargingStations, isLoading } = useChargingStations(region);
+  const { chargingStations, isLoading, isError } = useChargingStations(region);
 
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
@@ -115,15 +115,31 @@ export default function HomeScreen() {
       </TouchableOpacity>
 
       {isLoading && (
-        <View style={[styles.loadingContainer, { bottom: insets.bottom + BOTTOM_OFFSET }]}>
+        <View style={[styles.statusContainer, { bottom: insets.bottom + BOTTOM_OFFSET }]}>
           <BlurView
             intensity={90}
             tint={colorScheme === 'dark' ? 'dark' : 'light'}
-            style={styles.loadingBlur}
+            style={styles.statusBlur}
           >
             <ActivityIndicator
               size="small"
               color={colorScheme === 'dark' ? 'white' : '#007AFF'}
+            />
+          </BlurView>
+        </View>
+      )}
+
+      {isError && !isLoading && (
+        <View style={[styles.statusContainer, { bottom: insets.bottom + BOTTOM_OFFSET }]}>
+          <BlurView
+            intensity={90}
+            tint={colorScheme === 'dark' ? 'dark' : 'light'}
+            style={styles.statusBlur}
+          >
+            <Ionicons
+              name="warning"
+              size={24}
+              color={colorScheme === 'dark' ? '#FFD700' : '#FF6347'}
             />
           </BlurView>
         </View>
@@ -161,7 +177,7 @@ const styles = StyleSheet.create({
   locationButtonBlur: {
     padding: 10,
   },
-  loadingContainer: {
+  statusContainer: {
     position: 'absolute',
     left: 20,
     borderRadius: 10,
@@ -176,7 +192,7 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderCurve: 'continuous',
   },
-  loadingBlur: {
+  statusBlur: {
     padding: 10,
   },
   searchContainer: {
