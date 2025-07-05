@@ -1,13 +1,12 @@
-import { ExtendedStationDetails } from '@/api/stationDetails';
+import { DetailedStation } from '@/api/stationDetails';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { useQueryClient } from '@tanstack/react-query';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 interface StationDetailsSheetProps {
   stationId: string | null;
-  stationDetails: ExtendedStationDetails | null;
+  stationDetails: DetailedStation | null;
   isLoading: boolean;
   onClose: () => void;
 }
@@ -16,23 +15,9 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const queryClient = useQueryClient();
 
   // Snap points for the bottom sheet (percentage from bottom of screen)
   const snapPoints = useMemo(() => ['30%', '60%'], []);
-
-  // Update the last viewed timestamp whenever station details are viewed
-  useEffect(() => {
-    if (stationDetails && stationId) {
-      const updatedDetails = {
-        ...stationDetails,
-        lastViewed: Date.now()
-      };
-
-      // Update the cache with the new lastViewed timestamp
-      queryClient.setQueryData(['extendedStationDetails', stationId], updatedDetails);
-    }
-  }, [stationDetails, stationId, queryClient]);
 
   // Callback for sheet changes
   const handleSheetChanges = useCallback((index: number) => {
@@ -45,7 +30,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
   // Function to format date to readable string
   const formatDate = (timestamp: number | undefined) => {
     if (!timestamp) return 'Never';
-    
+
     const date = new Date(timestamp);
     return date.toLocaleString();
   };
@@ -58,9 +43,9 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
       'OUT_OF_ORDER': '#F44336',
       'UNKNOWN': '#9E9E9E'
     };
-    
+
     const color = statusColors[status] || '#9E9E9E';
-    
+
     return (
       <View style={styles.statusContainer}>
         <View style={[styles.statusDot, { backgroundColor: color }]} />
@@ -74,9 +59,9 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
   // Format price display
   const formatPrice = (priceInfo: { price: number, currency: string, type: string } | undefined) => {
     if (!priceInfo) return 'Not available';
-    
+
     const { price, currency, type } = priceInfo;
-    
+
     if (type === 'ENERGY') {
       return `${price.toFixed(2)} ${currency}/kWh`;
     } else if (type === 'TIME') {
@@ -134,7 +119,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
             </TouchableOpacity>
           </View>
-          
+
           {/* Station address */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -147,7 +132,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               {stationDetails.address.fullAddress}
             </Text>
           </View>
-          
+
           {/* Station operator */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -166,7 +151,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               </View>
             )}
           </View>
-          
+
           {/* Price information */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -179,7 +164,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               {formatPrice(stationDetails.lowestPrice)}
             </Text>
           </View>
-          
+
           {/* Availability information */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -193,7 +178,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
             </Text>
             {renderConnectorStatus(stationDetails.status)}
           </View>
-          
+
           {/* Connectors list */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -226,7 +211,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               </View>
             ))}
           </View>
-          
+
           {/* Last viewed information */}
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -239,7 +224,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               {formatDate(stationDetails.lastViewed)}
             </Text>
           </View>
-          
+
           {/* Opening times if available */}
           {stationDetails.openingTimes && stationDetails.openingTimes.length > 0 && (
             <View style={styles.section}>

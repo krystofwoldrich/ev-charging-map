@@ -1,5 +1,5 @@
 import { ChargingStation } from '@/api/converters';
-import { useStationPrice } from '@/hooks/useStationPrice';
+import { useStationPrice } from '@/hooks/useStationDetail';
 import { Ionicons } from '@expo/vector-icons';
 import React, { memo, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';

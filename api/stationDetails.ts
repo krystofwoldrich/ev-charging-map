@@ -31,7 +31,8 @@ export interface StationEvse {
   connectors: StationConnector[];
 }
 
-export interface DetailedStation {
+// Raw API response interface
+export interface StationApiResponse {
   id: string;
   name: string;
   address: {
@@ -70,8 +71,8 @@ export interface DetailedStation {
   };
 }
 
-// Extended station details interface with all the information we want to display
-export interface ExtendedStationDetails {
+// Processed station details for display
+export interface DetailedStation {
   id: string;
   name: string;
   address: {
@@ -79,7 +80,7 @@ export interface ExtendedStationDetails {
     street: string;
     countryIsoCode: string;
     postalCode: string;
-    fullAddress?: string;
+    fullAddress: string;
   };
   coordinates: {
     latitude: number;
@@ -120,7 +121,9 @@ export interface ExtendedStationDetails {
   };
 }
 
-export const fetchStationDetails = async (stationId: string): Promise<DetailedStation | null> => {
+// We've merged ExtendedStationDetails into DetailedStation
+
+export const fetchStationDetails = async (stationId: string): Promise<StationApiResponse | null> => {
   const API_URL = `https://cdc-api.plugsurfing.com/public/v4/locations/${stationId}?userPrefix=ps-plugsurfing`;
 
   try {
@@ -149,7 +152,7 @@ export const fetchStationDetails = async (stationId: string): Promise<DetailedSt
   }
 };
 
-export const extractLowestPrice = (station: DetailedStation): { price: number; currency: string; type: string } | null => {
+export const extractLowestPrice = (station: StationApiResponse): { price: number; currency: string; type: string } | null => {
   let lowestPrice: number | null = null;
   let currency = '';
   let priceType = '';
@@ -214,8 +217,11 @@ export const extractLowestPrice = (station: DetailedStation): { price: number; c
 /**
  * Convert a DetailedStation to our ExtendedStationDetails format with all necessary information
  */
-export const convertToExtendedDetails = (station: DetailedStation): ExtendedStationDetails => {
-  const connectors: ExtendedStationDetails['connectors'] = [];
+/**
+ * Process station details from API response into our display format
+ */
+export const processStationDetails = (station: StationApiResponse): DetailedStation => {
+  const connectors: DetailedStation['connectors'] = [];
   let lowestPrice: { price: number; currency: string; type: string } | null = null;
   let availableConnectors = 0;
   let totalConnectors = 0;

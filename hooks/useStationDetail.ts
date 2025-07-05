@@ -1,5 +1,5 @@
-import { DetailedStation, fetchStationDetails, processStationDetails } from '@/api/stationDetails';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchStationDetails, processStationDetails } from '@/api/stationDetails';
+import { useQuery } from '@tanstack/react-query';
 
 /**
  * Hook to fetch and store detailed station information including prices
@@ -8,43 +8,17 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
  * @returns Query result containing the station's price information
  */
 export function useStationDetails(stationId: string | undefined, shouldFetch: boolean = false) {
-  const queryClient = useQueryClient();
-
   return useQuery({
     queryKey: ['stationDetails', stationId],
     queryFn: async () => {
       if (!stationId) return null;
-
-      // Check if we already have cached data
-      const cachedData = queryClient.getQueryData<DetailedStation>(['stationDetails', stationId]);
-
-      if (cachedData) {
-        // If we have cached data, just update the lastViewed timestamp
-        const updatedDetails = {
-          ...cachedData,
-          lastViewed: Date.now()
-        };
-
-        // Update the cache with the new lastViewed timestamp
-        queryClient.setQueryData(['stationDetails', stationId], updatedDetails);
-
-        return updatedDetails;
-      }
 
       // If no cached data, fetch from API
       const apiResponse = await fetchStationDetails(stationId);
       if (!apiResponse) return null;
 
       // Process the API response into our display format
-      const stationDetails = processStationDetails(apiResponse);
-
-      // Set last viewed timestamp
-      stationDetails.lastViewed = Date.now();
-
-      // Cache the details for use in other components
-      queryClient.setQueryData(['stationDetails', stationId], stationDetails);
-
-      return stationDetails;
+      return processStationDetails(apiResponse);
     },
     // Only enabled if we have a stationId AND shouldFetch is true
     enabled: !!stationId && shouldFetch,

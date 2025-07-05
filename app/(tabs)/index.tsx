@@ -3,7 +3,7 @@ import StationMarker from '@/components/StationMarker';
 import { AddressSuggestion, useAddressSearch } from '@/hooks/useAddressSearch';
 import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
-import { useStationDetails } from '@/hooks/useStationPrice';
+import { useStationDetails } from '@/hooks/useStationDetail';
 import { getDistrictLevelDeltasForWindow, isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
