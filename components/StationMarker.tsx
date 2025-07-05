@@ -106,7 +106,7 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
             name="flash"
             size={displayText ? 10 : 16}
             color="white"
-            style={displayText ? { marginRight: 4 } : undefined}
+            style={displayText ? { marginRight: 4 } : { marginLeft: 2 }}
           />
           <Text numberOfLines={1} style={styles.markerText}>{displayText}</Text>
         </Animated.View>
