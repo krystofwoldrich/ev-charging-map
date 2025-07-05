@@ -6,6 +6,7 @@ import { useCurrentAddress } from '@/hooks/useCurrentAddress';
 import { useStationDetails } from '@/hooks/useStationDetail';
 import { getDistrictLevelDeltasForWindow, isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
 import { Ionicons } from '@expo/vector-icons';
+import { useIsFetching } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
@@ -29,7 +30,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
 
   // Use our custom hook for charging stations data
-  const { chargingStations, isLoading, isError } = useChargingStations(region);
+  const { chargingStations, isLoading: isLoadingStations, isError } = useChargingStations(region);
 
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
@@ -112,6 +113,9 @@ export default function HomeScreen() {
   const handleCloseBottomSheet = () => {
     setSelectedStationId(null);
   };
+
+  const isLoadingDetails = useIsFetching({ queryKey: ['stationDetails'] }) > 0;
+  const showSpinner = isLoadingStations || isLoadingDetails;
 
   return (
     <View style={styles.container}>
@@ -262,7 +266,7 @@ export default function HomeScreen() {
         </BlurView>
       </TouchableOpacity>
 
-      {isLoading && (
+      {showSpinner && (
         <View style={[styles.statusContainer, { bottom: insets.bottom + BOTTOM_OFFSET }]}>
           <BlurView
             intensity={90}
@@ -277,7 +281,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {isError && !isLoading && (
+      {isError && !isLoadingStations && (
         <View style={[styles.statusContainer, { bottom: insets.bottom + BOTTOM_OFFSET }]}>
           <BlurView
             intensity={90}
