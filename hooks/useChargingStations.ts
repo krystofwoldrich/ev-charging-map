@@ -3,6 +3,16 @@ import { fetchChargingLocations } from '@/api/plugsurfing';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Region } from 'react-native-maps';
 
+// Maximum number of stations to keep in memory
+const MAX_STATIONS = 200;
+
+/**
+ * Custom hook to fetch and manage charging stations with a limit on the maximum number stored.
+ * When the number of stations exceeds MAX_STATIONS, the oldest stations are removed first.
+ *
+ * @param region The current map region to fetch stations for
+ * @returns Object containing charging stations array and loading/error states
+ */
 export const useChargingStations = (region: Region | undefined) => {
   const queryClient = useQueryClient();
 
@@ -19,6 +29,8 @@ export const useChargingStations = (region: Region | undefined) => {
       // Manually update the master list in the cache
       queryClient.setQueryData<Map<string, ChargingStation>>(['allStations'], (oldData) => {
         const stationMap = oldData || new Map<string, ChargingStation>();
+
+        // Add or update stations from the new batch
         newStations.forEach(station => {
           // Check if we already have detailed pricing info for this station
           const existingStation = stationMap.get(station.id);
@@ -35,6 +47,27 @@ export const useChargingStations = (region: Region | undefined) => {
           };
           stationMap.set(station.id, stationWithTimestamp);
         });
+
+        // If we exceed the maximum number of stations, remove the oldest ones
+        if (stationMap.size > MAX_STATIONS) {
+          // Convert to array to sort by lastUpdated timestamp
+          const stationsArray = Array.from(stationMap.entries());
+          // Sort by lastUpdated (oldest first)
+          stationsArray.sort(([, a], [, b]) =>
+            (a.lastUpdated || 0) - (b.lastUpdated || 0)
+          );
+
+          // Remove oldest stations until we're back to MAX_STATIONS
+          const excessCount = stationMap.size - MAX_STATIONS;
+          console.log(`Removing ${excessCount} oldest stations to stay within limit of ${MAX_STATIONS}`);
+
+          for (let i = 0; i < excessCount; i++) {
+            if (stationsArray[i]) {
+              stationMap.delete(stationsArray[i][0]);
+            }
+          }
+        }
+
         return stationMap;
       });
 
