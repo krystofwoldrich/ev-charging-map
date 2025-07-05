@@ -1,9 +1,14 @@
 import { ChargingStation } from '@/api/converters';
 import { useStationPrice } from '@/hooks/useStationPrice';
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo, useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import React, { memo, useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
+} from 'react-native-reanimated';
 
 interface StationMarkerProps {
   station: ChargingStation;
@@ -14,10 +19,10 @@ interface StationMarkerProps {
 const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProps) => {
   const { data: priceInfo } = useStationPrice(station.id, shouldFetchPrice);
 
-  // Animation for marker width
-  const widthAnim = useRef(new Animated.Value(28)).current; // Initial width for icon-only state
+  // Animation for marker width using Reanimated shared value
+  const widthAnim = useSharedValue(28); // Initial width for icon-only state
   // Keep track of previous display text state to detect changes
-  const prevDisplayTextRef = useRef<string | null>(null);
+  const prevDisplayTextRef = React.useRef<string | null>(null);
 
   // Determine what to display in the marker
   let displayText: string = '';
@@ -43,15 +48,15 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
     // Set initial width based on whether there's display text
     // Calculate a more precise width based on text content - adjust multipliers as needed
     const textWidth = displayText.length * 8; // ~8 points per character as an estimate
-    const iconWidth = 14; // icon size + margin if there's text
-    const paddingWidth = 12; // horizontal padding
+    const iconWidth = displayText ? 10 + 4 : 16; // icon size + margin if there's text
+    const paddingWidth = displayText ? 12 : 8; // horizontal padding
     const targetWidth = displayText ? (textWidth + iconWidth + paddingWidth) : 28; // Calculate total width
 
     // Detect when displayText changes from empty to non-empty or vice versa
     if (prevDisplayTextRef.current === null) {
       // First render, just store the current value and set initial width
       prevDisplayTextRef.current = displayText;
-      widthAnim.setValue(targetWidth);
+      widthAnim.value = targetWidth;
       return;
     }
 
@@ -60,17 +65,25 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
 
     // Only animate when the presence of text changes, not on every price update
     if (hadTextBefore !== hasTextNow) {
-      // Animate the width change
-      Animated.timing(widthAnim, {
-        toValue: targetWidth,
+      // Animate the width change with Reanimated's withTiming
+      widthAnim.value = withTiming(targetWidth, { 
         duration: 300,
-        useNativeDriver: false, // Width animation can't use native driver
-      }).start();
+      });
+    } else if (hasTextNow && displayText !== prevDisplayTextRef.current) {
+      // If the text content changed but still has text, update the width without animation
+      widthAnim.value = targetWidth;
     }
 
     // Update the ref for the next render
     prevDisplayTextRef.current = displayText;
   }, [displayText, widthAnim]);
+
+  // Define animated styles using Reanimated's useAnimatedStyle
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      width: widthAnim.value,
+    };
+  });
 
   return (
     <Marker
@@ -87,12 +100,13 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
         style={styles.markerWrapper}>
         <Animated.View style={[
           styles.markerContainer,
-          { width: widthAnim }
+          animatedStyle
         ]}>
           <Ionicons
             name="flash"
             size={displayText ? 10 : 16}
             color="white"
+            style={displayText ? { marginRight: 4 } : undefined}
           />
           <Text numberOfLines={1} style={styles.markerText}>{displayText}</Text>
         </Animated.View>
@@ -108,13 +122,14 @@ const styles = StyleSheet.create({
     width: 200,
   },
   markerContainer: {
-    flex: 1,
     backgroundColor: 'black',
+    paddingHorizontal: 6,
     paddingVertical: 4,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden', // Important for width animation
   },
   markerText: {
     color: 'white',
