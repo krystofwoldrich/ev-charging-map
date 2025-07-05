@@ -1,7 +1,7 @@
 import StationMarker from '@/components/StationMarker';
 import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
-import { isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
+import { getDistrictLevelDeltasForWindow, isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
@@ -42,12 +42,13 @@ export default function HomeScreen() {
 
       let location = await Location.getCurrentPositionAsync({});
       setUserLocation(location);
+
       const userRegion = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
-        latitudeDelta: 0.02, // Smaller value for more zoom
-        longitudeDelta: 0.01, // Smaller value for more zoom
+        ...getDistrictLevelDeltasForWindow(),
       };
+
       setInitialRegion(userRegion);
       setRegion(userRegion); // Set region for initial data fetching
     })();
@@ -58,8 +59,7 @@ export default function HomeScreen() {
       mapViewRef.current?.animateToRegion({
         latitude: userLocation.coords.latitude,
         longitude: userLocation.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        ...getDistrictLevelDeltasForWindow(),
       }, 1000); // 1000ms animation duration
     }
   };

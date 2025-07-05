@@ -1,4 +1,5 @@
 import { ChargingStation } from '@/api/converters';
+import { Dimensions } from 'react-native';
 import { Region } from 'react-native-maps';
 
 // Define the maximum zoom level at which prices should be displayed
@@ -30,4 +31,59 @@ export function isStationInRegion(station: ChargingStation, region: Region | und
     station.coordinates.longitude <= adjustedEastLng &&
     station.coordinates.longitude >= adjustedWestLng
   );
+}
+
+/**
+ * Calculates appropriate latitude and longitude deltas for a city district level of zoom
+ * based on the application window dimensions.
+ *
+ * @returns Region deltas suitable for city district level zoom
+ */
+export function getDistrictLevelDeltas(width: number, height: number): { latitudeDelta: number, longitudeDelta: number } {
+  // Base delta values calibrated for city district view
+  // Use a slightly smaller delta than the threshold to ensure we're comfortably within the detail view
+  const baseLatDelta = MAX_ZOOM_THRESHOLD * 0.75;
+
+  const aspectRatio = width / height;
+  const longitudeDelta = baseLatDelta * aspectRatio;
+
+  return {
+    latitudeDelta: baseLatDelta,
+    longitudeDelta
+  };
+}
+
+// Cache for deltas to avoid recalculating on every render
+let deltaCache: {
+  width: number;
+  height: number;
+  deltas: { latitudeDelta: number; longitudeDelta: number };
+} | null = null;
+
+/**
+ * Returns district level deltas for the current window size with caching
+ * to avoid recalculations on every render. Automatically reads window dimensions.
+ *
+ * @returns Cached or newly calculated region deltas
+ */
+export function getDistrictLevelDeltasForWindow(): { latitudeDelta: number; longitudeDelta: number } {
+  // Get current window dimensions
+  const { width, height } = Dimensions.get('window');
+
+  // Return cached value if dimensions haven't changed
+  if (deltaCache && deltaCache.width === width && deltaCache.height === height) {
+    return deltaCache.deltas;
+  }
+
+  // Calculate new deltas
+  const deltas = getDistrictLevelDeltas(width, height);
+
+  // Cache the result
+  deltaCache = {
+    width,
+    height,
+    deltas
+  };
+
+  return deltas;
 }
