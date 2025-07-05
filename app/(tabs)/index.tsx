@@ -1,7 +1,9 @@
+import StationDetailsSheet from '@/components/StationDetailsSheet';
 import StationMarker from '@/components/StationMarker';
 import { AddressSuggestion, useAddressSearch } from '@/hooks/useAddressSearch';
 import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
+import { useStationDetails } from '@/hooks/useStationPrice';
 import { getDistrictLevelDeltasForWindow, isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -21,6 +23,7 @@ export default function HomeScreen() {
   const [userLocation, setUserLocation] = useState<Location.LocationObject | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
 
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
@@ -33,6 +36,12 @@ export default function HomeScreen() {
 
   // Use our custom hook for address search
   const { suggestions, isSearching, searchAddresses, clearSuggestions } = useAddressSearch();
+
+  // Use our custom hook for station details
+  const { data: stationDetails, isLoading: isLoadingStationDetails } = useStationDetails(
+    selectedStationId || undefined,
+    !!selectedStationId
+  );
 
   const isZoomedIn = region ? shouldFetchStationDetail(region.latitudeDelta) : false
   const shouldFetchPrices = (station: ChargingStation) => isZoomedIn && isStationInRegion(station, region);
@@ -94,6 +103,16 @@ export default function HomeScreen() {
     Keyboard.dismiss();
   };
 
+  // Handle station marker press
+  const handleStationPress = (stationId: string) => {
+    setSelectedStationId(stationId);
+  };
+
+  // Handle bottom sheet close
+  const handleCloseBottomSheet = () => {
+    setSelectedStationId(null);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
@@ -115,6 +134,7 @@ export default function HomeScreen() {
             key={station.id}
             station={station}
             shouldFetchPrice={shouldFetchPrices(station)}
+            onPress={() => handleStationPress(station.id)} // Pass station ID to handler
           />
         ))}
       </MapView>
@@ -272,6 +292,14 @@ export default function HomeScreen() {
           </BlurView>
         </View>
       )}
+
+      {/* Station details bottom sheet */}
+      <StationDetailsSheet
+        stationId={selectedStationId}
+        stationDetails={stationDetails || null}
+        isLoading={isLoadingStationDetails}
+        onClose={handleCloseBottomSheet}
+      />
     </View>
   );
 }

@@ -61,6 +61,63 @@ export interface DetailedStation {
     }[];
     aggregatedStatus: string;
   };
+  // Additional properties that might be present in the API response
+  extraProperties?: {
+    openingHours?: {
+      [day: string]: string;
+    };
+    // Add other properties as needed
+  };
+}
+
+// Extended station details interface with all the information we want to display
+export interface ExtendedStationDetails {
+  id: string;
+  name: string;
+  address: {
+    city: string;
+    street: string;
+    countryIsoCode: string;
+    postalCode: string;
+    fullAddress?: string;
+  };
+  coordinates: {
+    latitude: number;
+    longitude: number;
+  };
+  operator: {
+    name: string;
+    id: string;
+  };
+  isGreenEnergy: boolean;
+  connectors: {
+    id: string;
+    type: string;
+    power: number;
+    status: string;
+    powerType: string;
+    isQuickCharge: boolean;
+    priceInfo?: {
+      price: number;
+      currency: string;
+      type: string;
+      description?: string;
+    };
+  }[];
+  status: string;
+  availableConnectors: number;
+  totalConnectors: number;
+  lastUpdated: number;
+  lastViewed?: number;
+  openingTimes?: {
+    day: string;
+    hours: string;
+  }[];
+  lowestPrice?: {
+    price: number;
+    currency: string;
+    type: string;
+  };
 }
 
 export const fetchStationDetails = async (stationId: string): Promise<DetailedStation | null> => {
@@ -152,4 +209,136 @@ export const extractLowestPrice = (station: DetailedStation): { price: number; c
   }
 
   return lowestPrice !== null ? { price: lowestPrice, currency, type: priceType } : null;
+};
+
+/**
+ * Convert a DetailedStation to our ExtendedStationDetails format with all necessary information
+ */
+export const convertToExtendedDetails = (station: DetailedStation): ExtendedStationDetails => {
+  const connectors: ExtendedStationDetails['connectors'] = [];
+  let lowestPrice: { price: number; currency: string; type: string } | null = null;
+  let availableConnectors = 0;
+  let totalConnectors = 0;
+  let openingTimes: { day: string; hours: string }[] | undefined = undefined;
+
+  // Process all connectors
+  for (const evse of station.evses) {
+    for (const connector of evse.connectors) {
+      totalConnectors++;
+      
+      if (connector.status === 'AVAILABLE') {
+        availableConnectors++;
+      }
+
+      // Extract price info if available
+      let priceInfo = undefined;
+      if (connector.priceProfile?.content) {
+        try {
+          const priceContent = JSON.parse(connector.priceProfile.content);
+          if (priceContent.segments && priceContent.segments.length > 0) {
+            const segment = priceContent.segments[0];
+            if (segment.price_components && segment.price_components.length > 0) {
+              const component = segment.price_components[0]; // Get first component for simplicity
+              if (typeof component.price === 'number') {
+                priceInfo = {
+                  price: component.price,
+                  currency: connector.priceProfile.currency,
+                  type: component.type,
+                  description: connector.priceDescription
+                };
+
+                // Update lowest price if needed
+                if (!lowestPrice || component.price < lowestPrice.price) {
+                  lowestPrice = {
+                    price: component.price,
+                    currency: connector.priceProfile.currency,
+                    type: component.type
+                  };
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error parsing price content:', error);
+        }
+      }
+
+      // Add connector to our list
+      connectors.push({
+        id: connector.id,
+        type: connector.category,
+        power: connector.power,
+        status: connector.status,
+        powerType: connector.powerType,
+        isQuickCharge: connector.quick,
+        priceInfo
+      });
+    }
+  }
+
+  // If we didn't extract a lowest price earlier, use the standard method
+  if (!lowestPrice) {
+    lowestPrice = extractLowestPrice(station);
+  }
+
+  // Create full address
+  const fullAddress = `${station.address.street}, ${station.address.postalCode} ${station.address.city}, ${station.address.countryIsoCode}`;
+
+  // Parse opening hours if available
+  try {
+    // Try to extract opening hours from station data
+    if (station.extraProperties?.openingHours) {
+      openingTimes = [];
+      const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      
+      // Parse available opening hours
+      daysOfWeek.forEach(day => {
+        const hours = station.extraProperties?.openingHours?.[day.toLowerCase()];
+        if (hours) {
+          openingTimes!.push({
+            day,
+            hours: typeof hours === 'string' ? hours : '24/7'
+          });
+        }
+      });
+    } 
+    
+    // If no opening hours were found, assume 24/7 for EV charging stations
+    if (!openingTimes || openingTimes.length === 0) {
+      openingTimes = [
+        { day: 'All days', hours: '24/7' }
+      ];
+    }
+  } catch (error) {
+    console.error('Error parsing opening hours:', error);
+    // Default to 24/7 as a fallback
+    openingTimes = [
+      { day: 'All days', hours: '24/7' }
+    ];
+  }
+
+  return {
+    id: station.id,
+    name: station.name,
+    address: {
+      ...station.address,
+      fullAddress
+    },
+    coordinates: {
+      latitude: station.latitude,
+      longitude: station.longitude
+    },
+    operator: {
+      name: station.operatorDisplayName,
+      id: station.operatorId
+    },
+    isGreenEnergy: station.isGreenEnergy,
+    connectors,
+    status: station.summary.aggregatedStatus,
+    availableConnectors,
+    totalConnectors,
+    lastUpdated: Date.now(),
+    openingTimes,
+    lowestPrice: lowestPrice || undefined
+  };
 };
