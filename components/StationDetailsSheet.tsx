@@ -17,7 +17,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
   const isDark = colorScheme === 'dark';
 
   // Snap points for the bottom sheet (percentage from bottom of screen)
-  const snapPoints = useMemo(() => ['30%', '60%'], []);
+  const snapPoints = useMemo(() => ['60%'], []);
 
   // Callback for sheet changes
   const handleSheetChanges = useCallback((index: number) => {
@@ -80,7 +80,8 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
         {...props}
         disappearsOnIndex={-1}
         appearsOnIndex={0}
-        opacity={0.5}
+        opacity={0}
+        enableTouchThrough={true}
       />
     ),
     []
@@ -100,6 +101,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
       backgroundStyle={{ backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }}
       handleIndicatorStyle={{ backgroundColor: isDark ? '#E5E5E7' : '#3C3C43' }}
       backdropComponent={renderBackdrop}
+      enablePanDownToClose={true}
     >
       {isLoading ? (
         <View style={styles.loadingContainer}>
@@ -115,9 +117,6 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
             <Text style={[styles.stationName, { color: isDark ? '#FFFFFF' : '#000000' }]}>
               {stationDetails.name}
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-            </TouchableOpacity>
           </View>
 
           {/* Station address */}
