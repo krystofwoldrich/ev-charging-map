@@ -1,8 +1,8 @@
 import { ChargingStation } from '@/api/converters';
 import { useStationPrice } from '@/hooks/useStationPrice';
 import { Ionicons } from '@expo/vector-icons';
-import React, { memo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { memo, useEffect, useRef } from 'react';
+import { Animated, StyleSheet, Text, View } from 'react-native';
 import { Marker } from 'react-native-maps';
 
 interface StationMarkerProps {
@@ -13,6 +13,11 @@ interface StationMarkerProps {
 
 const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProps) => {
   const { data: priceInfo } = useStationPrice(station.id, shouldFetchPrice);
+
+  // Animation for marker width
+  const widthAnim = useRef(new Animated.Value(28)).current; // Initial width for icon-only state
+  // Keep track of previous display text state to detect changes
+  const prevDisplayTextRef = useRef<string | null>(null);
 
   // Determine what to display in the marker
   let displayText: string = '';
@@ -31,6 +36,42 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
     }
   }
 
+  // We removed the scale animation, so no need for an effect on mount
+
+  // Effect to handle animation when price information changes
+  useEffect(() => {
+    // Set initial width based on whether there's display text
+    // Calculate a more precise width based on text content - adjust multipliers as needed
+    const textWidth = displayText.length * 8; // ~8 points per character as an estimate
+    const iconWidth = 14; // icon size + margin if there's text
+    const paddingWidth = 12; // horizontal padding
+    const targetWidth = displayText ? (textWidth + iconWidth + paddingWidth) : 28; // Calculate total width
+
+    // Detect when displayText changes from empty to non-empty or vice versa
+    if (prevDisplayTextRef.current === null) {
+      // First render, just store the current value and set initial width
+      prevDisplayTextRef.current = displayText;
+      widthAnim.setValue(targetWidth);
+      return;
+    }
+
+    const hadTextBefore = Boolean(prevDisplayTextRef.current);
+    const hasTextNow = Boolean(displayText);
+
+    // Only animate when the presence of text changes, not on every price update
+    if (hadTextBefore !== hasTextNow) {
+      // Animate the width change
+      Animated.timing(widthAnim, {
+        toValue: targetWidth,
+        duration: 300,
+        useNativeDriver: false, // Width animation can't use native driver
+      }).start();
+    }
+
+    // Update the ref for the next render
+    prevDisplayTextRef.current = displayText;
+  }, [displayText, widthAnim]);
+
   return (
     <Marker
       coordinate={station.coordinates}
@@ -44,18 +85,17 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
         // The fixed max width ensures the markers don't slide on the map after the internal size change
         testID={`station-marker-wrapper-${station.id}`}
         style={styles.markerWrapper}>
-        <View style={[
+        <Animated.View style={[
           styles.markerContainer,
-          !displayText && styles.markerContainerIconOnly
+          { width: widthAnim }
         ]}>
           <Ionicons
             name="flash"
             size={displayText ? 10 : 16}
             color="white"
-            style={displayText ? { marginRight: 4 } : undefined}
           />
-          <Text style={styles.markerText}>{displayText}</Text>
-        </View>
+          <Text numberOfLines={1} style={styles.markerText}>{displayText}</Text>
+        </Animated.View>
         <View style={styles.markerPin} />
       </View>
     </Marker>
@@ -68,16 +108,12 @@ const styles = StyleSheet.create({
     width: 200,
   },
   markerContainer: {
+    flex: 1,
     backgroundColor: 'black',
-    paddingHorizontal: 6,
     paddingVertical: 4,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  markerContainerIconOnly: {
-    paddingHorizontal: 4,
-    paddingVertical: 4,
     justifyContent: 'center',
   },
   markerText: {
