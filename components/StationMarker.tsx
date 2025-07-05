@@ -39,7 +39,11 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
       onPress={() => onPress?.(station.id)}
       tracksViewChanges={false}
     >
-      <View style={styles.markerWrapper}>
+      <View
+        // Mainly to avoid RN merging this wrapper with the children to minimize the number of views
+        // The fixed max width ensures the markers don't slide on the map after the internal size change
+        testID={`station-marker-wrapper-${station.id}`}
+        style={styles.markerWrapper}>
         <View style={[
           styles.markerContainer,
           !displayText && styles.markerContainerIconOnly
@@ -61,6 +65,7 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
 const styles = StyleSheet.create({
   markerWrapper: {
     alignItems: 'center',
+    width: 200,
   },
   markerContainer: {
     backgroundColor: 'black',
