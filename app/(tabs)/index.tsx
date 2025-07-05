@@ -1,7 +1,7 @@
 import StationMarker from '@/components/StationMarker';
 import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
-import { shouldFetchStationDetail } from '@/utils/mapHelpers';
+import { isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import Constants from 'expo-constants';
@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, TextInput, TouchableOpacity, View, useColorScheme } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ChargingStation } from '../../api/converters';
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
@@ -28,7 +29,8 @@ export default function HomeScreen() {
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
 
-  const shouldFetchPrices = region ? shouldFetchStationDetail(region.latitudeDelta) : false;
+  const isZoomedIn = region ? shouldFetchStationDetail(region.latitudeDelta) : false
+  const shouldFetchPrices = (station: ChargingStation) => isZoomedIn && isStationInRegion(station, region);
 
   useEffect(() => {
     (async () => {
@@ -76,7 +78,7 @@ export default function HomeScreen() {
           <StationMarker
             key={station.id}
             station={station}
-            shouldFetchPrice={shouldFetchPrices}
+            shouldFetchPrice={shouldFetchPrices(station)}
           />
         ))}
       </MapView>
