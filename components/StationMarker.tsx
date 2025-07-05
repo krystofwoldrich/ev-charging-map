@@ -108,7 +108,7 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
             color="white"
             style={displayText ? { marginRight: 4 } : { marginLeft: 2 }}
           />
-          <Text numberOfLines={1} style={styles.markerText}>{displayText}</Text>
+          <Text numberOfLines={1} ellipsizeMode='clip' style={styles.markerText}>{displayText}</Text>
         </Animated.View>
         <View style={styles.markerPin} />
       </View>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden', // Important for width animation
+    textOverflow: 'hidden',
   },
   markerText: {
     color: 'white',
