@@ -5,6 +5,7 @@ import { useChargingStations } from '@/hooks/useChargingStations';
 import { useCurrentAddress } from '@/hooks/useCurrentAddress';
 import { useStationDetails } from '@/hooks/useStationDetail';
 import { getDistrictLevelDeltasForWindow, isStationInRegion, shouldFetchStationDetail } from '@/utils/mapHelpers';
+import { Button, ContextMenu } from '@expo/ui/swift-ui';
 import { Ionicons } from '@expo/vector-icons';
 import { useIsFetching } from '@tanstack/react-query';
 import { BlurView } from 'expo-blur';
@@ -25,6 +26,7 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
+  const [selectedConnectorType, setSelectedConnectorType] = useState<'TYPE2' | 'CCS' | null>('TYPE2');
 
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
@@ -251,6 +253,55 @@ export default function HomeScreen() {
         </BlurView>
       )}
 
+      {/* Connector type filter with ContextMenu */}
+      {!selectedStationId && selectedConnectorType && (
+        <ContextMenu
+          style={{
+            // FIXME: Use MapOverlayContainer instead of absolute positioning
+            position: 'absolute',
+            top: 125,
+            left: 15,
+            width: 80,
+            height: 33,
+          }}
+        >
+          <ContextMenu.Items>
+            <Button
+              onPress={() => setSelectedConnectorType('TYPE2')}>
+              Type 2
+            </Button>
+            <Button
+              onPress={() => setSelectedConnectorType('CCS')}>
+              CCS
+            </Button>
+          </ContextMenu.Items>
+          <ContextMenu.Trigger>
+              <BlurView
+                intensity={90}
+                tint={colorScheme === 'dark' ? 'dark' : 'light'}
+                style={{
+                  flexShrink: 1,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 10,
+                  height: 33,
+                  overflow: 'hidden',
+                }}
+              >
+                  <Text style={[
+                    styles.connectorOptionText,
+                    { color: colorScheme === 'dark' ? 'white' : 'black' }
+                  ]}>
+                    {selectedConnectorType === 'TYPE2' ? 'Type 2' :
+                    selectedConnectorType === 'CCS' ? 'CCS' :
+                    selectedConnectorType === 'CHADEMO' ? 'CHAdeMO' :
+                    selectedConnectorType === 'TESLA' ? 'Tesla' : 'Unknown'}
+                  </Text>
+              </BlurView>
+          </ContextMenu.Trigger>
+        </ContextMenu>
+      )}
+
       {/* We've integrated the loading state and no results into the main suggestions component above */}
 
       <TouchableOpacity
@@ -445,5 +496,9 @@ const styles = StyleSheet.create({
   },
   noResultsText: {
     fontSize: 16,
+  },
+  connectorOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
