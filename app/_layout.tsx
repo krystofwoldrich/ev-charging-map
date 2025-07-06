@@ -1,5 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -18,6 +21,13 @@ const queryClient = new QueryClient({
   },
 });
 
+// Create the AsyncStorage persister
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+  key: 'ev-charging-map-cache',
+  throttleTime: 1000, // Throttle writes to avoid performance issues
+});
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -31,7 +41,24 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{
+          persister: asyncStoragePersister,
+          // Only persist non-error, non-loading queries
+          dehydrateOptions: {
+            shouldDehydrateQuery: (query) => {
+              return (
+                query.state.status === 'success' &&
+                !query.isStale() &&
+                !!query.state.data
+              );
+            },
+          },
+          // Maximum time the persisted data is considered valid (1 day)
+          maxAge: 1000 * 60 * 60 * 24,
+        }}
+      >
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -39,7 +66,7 @@ export default function RootLayout() {
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </GestureHandlerRootView>
   );
 }

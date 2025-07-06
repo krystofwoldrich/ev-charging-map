@@ -27,13 +27,13 @@ export const useChargingStations = (region: Region | undefined) => {
       const newStations = convertPlugsurfingToChargingStation(locations);
 
       // Manually update the master list in the cache
-      queryClient.setQueryData<Map<string, ChargingStation>>(['allStations'], (oldData) => {
-        const stationMap = oldData || new Map<string, ChargingStation>();
+      queryClient.setQueryData<Record<string, ChargingStation>>(['allStations'], (oldData) => {
+        const stationRecord = oldData || {};
 
         // Add or update stations from the new batch
         newStations.forEach(station => {
           // Check if we already have detailed pricing info for this station
-          const existingStation = stationMap.get(station.id);
+          const existingStation = stationRecord[station.id];
           const stationWithTimestamp = {
             ...station,
             // Preserve existing price info if available
@@ -45,30 +45,31 @@ export const useChargingStations = (region: Region | undefined) => {
             }),
             lastUpdated: Date.now(),
           };
-          stationMap.set(station.id, stationWithTimestamp);
+          stationRecord[station.id] = stationWithTimestamp;
         });
 
         // If we exceed the maximum number of stations, remove the oldest ones
-        if (stationMap.size > MAX_STATIONS) {
+        const stationCount = Object.keys(stationRecord).length;
+        if (stationCount > MAX_STATIONS) {
           // Convert to array to sort by lastUpdated timestamp
-          const stationsArray = Array.from(stationMap.entries());
+          const stationsArray = Object.entries(stationRecord);
           // Sort by lastUpdated (oldest first)
           stationsArray.sort(([, a], [, b]) =>
             (a.lastUpdated || 0) - (b.lastUpdated || 0)
           );
 
           // Remove oldest stations until we're back to MAX_STATIONS
-          const excessCount = stationMap.size - MAX_STATIONS;
+          const excessCount = stationCount - MAX_STATIONS;
           console.log(`Removing ${excessCount} oldest stations to stay within limit of ${MAX_STATIONS}`);
 
           for (let i = 0; i < excessCount; i++) {
             if (stationsArray[i]) {
-              stationMap.delete(stationsArray[i][0]);
+              delete stationRecord[stationsArray[i][0]];
             }
           }
         }
 
-        return stationMap;
+        return stationRecord;
       });
 
       return newStations;
@@ -80,14 +81,18 @@ export const useChargingStations = (region: Region | undefined) => {
     gcTime: 30 * 60 * 1000, // 30 minutes
   });
 
+  error && console.error('Error fetching charging stations:', error);
+
   // This query simply reads the master list from the cache for display
-  const { data: allStationsMap = new Map<string, ChargingStation>() } = useQuery({
+  const { data: allStationsRecord = {}, error: errorAllStations } = useQuery({
     queryKey: ['allStations'],
-    queryFn: () => new Map<string, ChargingStation>(), // Initial empty map
+    queryFn: () => ({} as Record<string, ChargingStation>), // Initial empty record
     staleTime: Infinity, // This data never becomes stale as it's our local cache
   });
 
-  const chargingStations = Array.from(allStationsMap.values());
+  errorAllStations && console.error('Error reading all stations from cache:', errorAllStations);
+
+  const chargingStations = Object.values(allStationsRecord);
 
   return {
     chargingStations,
