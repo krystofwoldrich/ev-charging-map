@@ -366,7 +366,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     height: 50,
     overflow: 'hidden', // Important for BlurView border radius
-    zIndex: 1, // Ensure search bar is above other elements
   },
   searchIcon: {
     marginRight: 10,
@@ -395,7 +394,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    zIndex: 1, // Ensure suggestions are above the map
   },
   suggestionItem: {
     flexDirection: 'row',
