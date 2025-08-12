@@ -14,9 +14,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to display it on the map."
       },
-      "config": {
-        "googleMapsApiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
-      }
+      "config": {}
     },
     "android": {
       "adaptiveIcon": {
@@ -29,11 +27,7 @@
         "android.permission.ACCESS_FINE_LOCATION"
       ],
       "package": "com.krystofwoldrich.evchargingmap",
-      "config": {
-        "googleMaps": {
-          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
-        }
-      }
+      "config": {}
     },
     "web": {
       "bundler": "metro",
