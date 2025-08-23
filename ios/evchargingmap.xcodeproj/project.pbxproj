@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		41D32F8B1C47C63736A98C05 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 918307382CAAD1AC2D3D29FE /* ExpoModulesProvider.swift */; };
-		6A5E74508D0FAA7AE3C5ED14 /* libPods-evchargingmap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 152E8689EDA3974B7C5283A2 /* libPods-evchargingmap.a */; };
-		9787D383C9FC0735771C0721 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2C35F3811366C11EABDC5E95 /* PrivacyInfo.xcprivacy */; };
+		4E43A81ECCA6F13F395501FD /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 484700BF70C9FD9BA58F565A /* PrivacyInfo.xcprivacy */; };
+		510EF40FD2BB5ECDB45C66CC /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE90973B07948CFC0AEF712B /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+		D848971DCEBAF6B8FAD99369 /* libPods-evchargingmap.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B14EA6F07E10AEE82BEEE0 /* libPods-evchargingmap.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -20,16 +20,16 @@
 		13B07F961A680F5B00A75B9A /* evchargingmap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = evchargingmap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = evchargingmap/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = evchargingmap/Info.plist; sourceTree = "<group>"; };
-		152E8689EDA3974B7C5283A2 /* libPods-evchargingmap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-evchargingmap.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2C35F3811366C11EABDC5E95 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = evchargingmap/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		6AA72F53C925A498984EA920 /* Pods-evchargingmap.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-evchargingmap.release.xcconfig"; path = "Target Support Files/Pods-evchargingmap/Pods-evchargingmap.release.xcconfig"; sourceTree = "<group>"; };
-		918307382CAAD1AC2D3D29FE /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-evchargingmap/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		484700BF70C9FD9BA58F565A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = evchargingmap/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		A2B14EA6F07E10AEE82BEEE0 /* libPods-evchargingmap.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-evchargingmap.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = evchargingmap/SplashScreen.storyboard; sourceTree = "<group>"; };
+		AE90973B07948CFC0AEF712B /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-evchargingmap/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		EB0D464E58510F62C079FCB8 /* Pods-evchargingmap.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-evchargingmap.release.xcconfig"; path = "Target Support Files/Pods-evchargingmap/Pods-evchargingmap.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		EE67E7E6334FCE2A2C0C27E6 /* Pods-evchargingmap.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-evchargingmap.debug.xcconfig"; path = "Target Support Files/Pods-evchargingmap/Pods-evchargingmap.debug.xcconfig"; sourceTree = "<group>"; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = evchargingmap/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* evchargingmap-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "evchargingmap-Bridging-Header.h"; path = "evchargingmap/evchargingmap-Bridging-Header.h"; sourceTree = "<group>"; };
+		FE71953ADB85086645DAF0B2 /* Pods-evchargingmap.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-evchargingmap.debug.xcconfig"; path = "Target Support Files/Pods-evchargingmap/Pods-evchargingmap.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,18 +37,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A5E74508D0FAA7AE3C5ED14 /* libPods-evchargingmap.a in Frameworks */,
+				D848971DCEBAF6B8FAD99369 /* libPods-evchargingmap.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		12F29E03115F6ADD3A07130A /* Pods */ = {
+		107224B049A1762D526BA482 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				EE67E7E6334FCE2A2C0C27E6 /* Pods-evchargingmap.debug.xcconfig */,
-				6AA72F53C925A498984EA920 /* Pods-evchargingmap.release.xcconfig */,
+				FE71953ADB85086645DAF0B2 /* Pods-evchargingmap.debug.xcconfig */,
+				EB0D464E58510F62C079FCB8 /* Pods-evchargingmap.release.xcconfig */,
 			);
 			name = Pods;
 			path = Pods;
@@ -63,24 +63,24 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				2C35F3811366C11EABDC5E95 /* PrivacyInfo.xcprivacy */,
+				484700BF70C9FD9BA58F565A /* PrivacyInfo.xcprivacy */,
 			);
 			name = evchargingmap;
 			sourceTree = "<group>";
 		};
-		1974B5305B9F12FD13C43BE8 /* ExpoModulesProviders */ = {
+		13C38EB7E13DFEFDCBB1F987 /* evchargingmap */ = {
 			isa = PBXGroup;
 			children = (
-				FD5235ADC862E7FAD68B3119 /* evchargingmap */,
+				AE90973B07948CFC0AEF712B /* ExpoModulesProvider.swift */,
 			);
-			name = ExpoModulesProviders;
+			name = evchargingmap;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				152E8689EDA3974B7C5283A2 /* libPods-evchargingmap.a */,
+				A2B14EA6F07E10AEE82BEEE0 /* libPods-evchargingmap.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -99,8 +99,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				12F29E03115F6ADD3A07130A /* Pods */,
-				1974B5305B9F12FD13C43BE8 /* ExpoModulesProviders */,
+				107224B049A1762D526BA482 /* Pods */,
+				A1048F849E91805467F55C23 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -115,6 +115,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		A1048F849E91805467F55C23 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				13C38EB7E13DFEFDCBB1F987 /* evchargingmap */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -122,14 +130,6 @@
 			);
 			name = Supporting;
 			path = evchargingmap/Supporting;
-			sourceTree = "<group>";
-		};
-		FD5235ADC862E7FAD68B3119 /* evchargingmap */ = {
-			isa = PBXGroup;
-			children = (
-				918307382CAAD1AC2D3D29FE /* ExpoModulesProvider.swift */,
-			);
-			name = evchargingmap;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -140,13 +140,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "evchargingmap" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				4C4D419458E78BAE908444DD /* [Expo] Configure project */,
+				4F3E9CBDF999B35B7646CB05 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				FA71D79E33CF284658ACE54C /* [CP] Embed Pods Frameworks */,
+				10F8031DDF4E446042DE0CBC /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -196,7 +196,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				9787D383C9FC0735771C0721 /* PrivacyInfo.xcprivacy in Resources */,
+				4E43A81ECCA6F13F395501FD /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,7 +240,25 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4C4D419458E78BAE908444DD /* [Expo] Configure project */ = {
+		10F8031DDF4E446042DE0CBC /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-evchargingmap/Pods-evchargingmap-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-evchargingmap/Pods-evchargingmap-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		4F3E9CBDF999B35B7646CB05 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -297,24 +315,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-evchargingmap/Pods-evchargingmap-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		FA71D79E33CF284658ACE54C /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-evchargingmap/Pods-evchargingmap-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-evchargingmap/Pods-evchargingmap-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -323,7 +323,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				41D32F8B1C47C63736A98C05 /* ExpoModulesProvider.swift in Sources */,
+				510EF40FD2BB5ECDB45C66CC /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,7 +332,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EE67E7E6334FCE2A2C0C27E6 /* Pods-evchargingmap.debug.xcconfig */;
+			baseConfigurationReference = FE71953ADB85086645DAF0B2 /* Pods-evchargingmap.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -368,7 +368,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 6AA72F53C925A498984EA920 /* Pods-evchargingmap.release.xcconfig */;
+			baseConfigurationReference = EB0D464E58510F62C079FCB8 /* Pods-evchargingmap.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
