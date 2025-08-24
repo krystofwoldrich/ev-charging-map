@@ -34,6 +34,8 @@ import { ChargingStation } from "../../api/converters";
 import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
 import { frame } from '@expo/ui/swift-ui/modifiers';
 
+import { CornerStyle, ExpoLiquidGlassView, LiquidGlassType } from "expo-liquid-glass-view";
+
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
   const [region, setRegion] = useState<Region | undefined>(undefined);
@@ -178,25 +180,65 @@ export default function HomeScreen() {
         ))}
       </MapView>
 
-      <BlurView
-        intensity={90}
-        tint={colorScheme === "dark" ? "dark" : "light"}
+      {/* <BlurView
+        tint={'regular'}
+        // intensity={90}
+        // tint={colorScheme === "dark" ? "dark" : "light"}
         style={styles.searchContainer}
+      > */}
+    <ExpoLiquidGlassView
+      cornerStyle={CornerStyle.Circular}
+      type={LiquidGlassType.Tint}
+
+      // tint="#000000"
+      cornerRadius={24}
+      style={styles.searchContainer}
+      // style={{ width: 200, height: 200, alignSelf: "center", marginTop: 100 }}
+    >
+      <View
+        style={{
+          // position: "absolute",
+          // top: Constants.statusBarHeight + 15,
+          // left: 15,
+          // right: 15,
+          flexDirection: "row",
+          alignItems: "center",
+          // borderRadius: 10,
+          paddingHorizontal: 15,
+          height: 50,
+          flex: 1,
+          // overflow: "hidden", // Important for BlurView border radius
+        }}
       >
-        <Ionicons
+                      <Ionicons
           name="search"
           size={20}
           color={colorScheme === "dark" ? "#E5E5E7" : "#3C3C43"}
           style={styles.searchIcon}
         />
+
+        {/* <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        > */}
         <TextInput
+          // style={{
+          //   flex: 1,
+          //   width: "100%",
+          // }}
           style={[
-            styles.searchInput,
+            // styles.searchInput,
+            {  flexGrow: 1 },
             { color: colorScheme === "dark" ? "white" : "black" },
           ]}
           placeholder={currentAddress || "Ionity, Nempitz, Germany"}
           placeholderTextColor={colorScheme === "dark" ? "#E5E5E7" : "#3C3C43"}
+          cursorColor={colorScheme === "dark" ? "white" : "black"}
           value={searchQuery}
+          
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}
           returnKeyType="search"
@@ -206,7 +248,8 @@ export default function HomeScreen() {
             // Do not set showSuggestions to false here
           }}
         />
-        {searchQuery.length > 0 && (
+          
+                  {searchQuery.length > 0 && (
           <TouchableOpacity
             onPress={() => {
               setSearchQuery("");
@@ -222,7 +265,10 @@ export default function HomeScreen() {
             />
           </TouchableOpacity>
         )}
-      </BlurView>
+              </View>
+
+        </ExpoLiquidGlassView>
+      {/* </BlurView> */}
 
       {/* Address suggestions */}
       {showSuggestions && (
@@ -314,16 +360,14 @@ export default function HomeScreen() {
           style={{
             // FIXME: Use MapOverlayContainer instead of absolute positioning
             position: "absolute",
-            top: 125,
-            left: 15,
+            top: 114,
+            left: 3,
           }}
         >
-          <Host 
-            matchContents 
-            modifiers={[frame({ height: 40, width: 100 })]}
+          <Host
+            matchContents
           >
-            <ContextMenu
-            >
+            <ContextMenu>
               <ContextMenu.Items>
                 <Button onPress={() => setSelectedConnectorType("TYPE2")}>
                   Type 2
@@ -335,6 +379,7 @@ export default function HomeScreen() {
               <ContextMenu.Trigger>
                 <Button
                   variant="glass"
+                  modifiers={[frame({ height: 40, width: 100 })]}
                 >
                   {selectedConnectorType === "TYPE2"
                     ? "Type 2"
@@ -478,19 +523,19 @@ const styles = StyleSheet.create({
     top: Constants.statusBarHeight + 15,
     left: 15,
     right: 15,
+    // flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 10,
+    // borderRadius: 10,
     paddingHorizontal: 15,
-    height: 50,
-    overflow: "hidden", // Important for BlurView border radius
+    height: 40,
+    // overflow: "hidden", // Important for BlurView border radius
   },
   searchIcon: {
     marginRight: 10,
   },
   searchInput: {
     flex: 1,
-    color: "black",
     fontSize: 16,
   },
   clearButton: {

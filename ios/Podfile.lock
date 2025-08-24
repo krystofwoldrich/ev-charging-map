@@ -47,6 +47,8 @@ PODS:
     - ExpoModulesCore
   - ExpoLinking (8.0.3):
     - ExpoModulesCore
+  - ExpoLiquidGlass (0.1.8):
+    - ExpoModulesCore
   - ExpoLocation (19.0.2):
     - ExpoModulesCore
   - ExpoMaps (0.12.2):
@@ -2105,6 +2107,7 @@ DEPENDENCIES:
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
   - ExpoLinking (from `../node_modules/expo-linking/ios`)
+  - ExpoLiquidGlass (from `../node_modules/expo-liquid-glass-view/ios`)
   - ExpoLocation (from `../node_modules/expo-location/ios`)
   - ExpoMaps (from `../node_modules/expo-maps/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
@@ -2221,6 +2224,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-keep-awake/ios"
   ExpoLinking:
     :path: "../node_modules/expo-linking/ios"
+  ExpoLiquidGlass:
+    :path: "../node_modules/expo-liquid-glass-view/ios"
   ExpoLocation:
     :path: "../node_modules/expo-location/ios"
   ExpoMaps:
@@ -2400,6 +2405,7 @@ SPEC CHECKSUMS:
   ExpoImage: 2ed05609d88a06f757b988d22c3d99f370c9ace2
   ExpoKeepAwake: b82838a919ea49839c9f65a73dee861fc217c589
   ExpoLinking: b198472f69cc43efe77722b72ea0504bdd3bf68b
+  ExpoLiquidGlass: c0a1b77f3bd9ed089361e2fbe7fe634cf705ec04
   ExpoLocation: b4f69162a18efb773d37a626712fc7d09e56f3de
   ExpoMaps: da1b4d4ddcf7bd7ed7b0510f2b1812ca24eb592c
   ExpoModulesCore: d0629cc9f8943d683575ab7ecb765e5a7f7b4712
