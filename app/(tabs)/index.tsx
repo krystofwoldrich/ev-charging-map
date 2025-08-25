@@ -22,7 +22,7 @@ import {
   Keyboard,
   StyleSheet,
   Text,
-  TextInput,
+
   TouchableOpacity,
   useColorScheme,
   View,
@@ -31,10 +31,13 @@ import MapView, { Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChargingStation } from "../../api/converters";
 
-import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
-import { frame } from '@expo/ui/swift-ui/modifiers';
-
-import { CornerStyle, ExpoLiquidGlassView, LiquidGlassType } from "expo-liquid-glass-view";
+import { Button, ContextMenu, Host, HStack, Image, TextField, VStack } from "@expo/ui/swift-ui";
+import {
+  cornerRadius,
+  frame,
+  glassEffect,
+  padding,
+} from "@expo/ui/swift-ui/modifiers";
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
@@ -180,96 +183,6 @@ export default function HomeScreen() {
         ))}
       </MapView>
 
-      {/* <BlurView
-        tint={'regular'}
-        // intensity={90}
-        // tint={colorScheme === "dark" ? "dark" : "light"}
-        style={styles.searchContainer}
-      > */}
-    <ExpoLiquidGlassView
-      cornerStyle={CornerStyle.Circular}
-      type={LiquidGlassType.Tint}
-
-      // tint="#000000"
-      cornerRadius={24}
-      style={styles.searchContainer}
-      // style={{ width: 200, height: 200, alignSelf: "center", marginTop: 100 }}
-    >
-      <View
-        style={{
-          // position: "absolute",
-          // top: Constants.statusBarHeight + 15,
-          // left: 15,
-          // right: 15,
-          flexDirection: "row",
-          alignItems: "center",
-          // borderRadius: 10,
-          paddingHorizontal: 15,
-          height: 50,
-          flex: 1,
-          // overflow: "hidden", // Important for BlurView border radius
-        }}
-      >
-                      <Ionicons
-          name="search"
-          size={20}
-          color={colorScheme === "dark" ? "#E5E5E7" : "#3C3C43"}
-          style={styles.searchIcon}
-        />
-
-        {/* <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-          }}
-        > */}
-        <TextInput
-          // style={{
-          //   flex: 1,
-          //   width: "100%",
-          // }}
-          style={[
-            // styles.searchInput,
-            {  flexGrow: 1 },
-            { color: colorScheme === "dark" ? "white" : "black" },
-          ]}
-          placeholder={currentAddress || "Ionity, Nempitz, Germany"}
-          placeholderTextColor={colorScheme === "dark" ? "#E5E5E7" : "#3C3C43"}
-          cursorColor={colorScheme === "dark" ? "white" : "black"}
-          value={searchQuery}
-          
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearch}
-          returnKeyType="search"
-          blurOnSubmit={true}
-          onBlur={() => {
-            // Only dismiss keyboard but keep suggestions visible
-            // Do not set showSuggestions to false here
-          }}
-        />
-          
-                  {searchQuery.length > 0 && (
-          <TouchableOpacity
-            onPress={() => {
-              setSearchQuery("");
-              clearSuggestions();
-              setShowSuggestions(false);
-            }}
-            style={styles.clearButton}
-          >
-            <Ionicons
-              name="close-circle"
-              size={20}
-              color={colorScheme === "dark" ? "#E5E5E7" : "#3C3C43"}
-            />
-          </TouchableOpacity>
-        )}
-              </View>
-
-        </ExpoLiquidGlassView>
-      {/* </BlurView> */}
-
       {/* Address suggestions */}
       {showSuggestions && (
         <BlurView
@@ -354,49 +267,6 @@ export default function HomeScreen() {
         </BlurView>
       )}
 
-      {/* Connector type filter with ContextMenu */}
-      {!selectedStationId && selectedConnectorType && (
-        <View
-          style={{
-            // FIXME: Use MapOverlayContainer instead of absolute positioning
-            position: "absolute",
-            top: 114,
-            left: 3,
-          }}
-        >
-          <Host
-            matchContents
-          >
-            <ContextMenu>
-              <ContextMenu.Items>
-                <Button onPress={() => setSelectedConnectorType("TYPE2")}>
-                  Type 2
-                </Button>
-                <Button onPress={() => setSelectedConnectorType("CCS")}>
-                  CCS
-                </Button>
-              </ContextMenu.Items>
-              <ContextMenu.Trigger>
-                <Button
-                  variant="glass"
-                  modifiers={[frame({ height: 40, width: 100 })]}
-                >
-                  {selectedConnectorType === "TYPE2"
-                    ? "Type 2"
-                    : selectedConnectorType === "CCS"
-                    ? "CCS"
-                    : selectedConnectorType === "CHADEMO"
-                    ? "CHAdeMO"
-                    : selectedConnectorType === "TESLA"
-                    ? "Tesla"
-                    : "Unknown"}
-                </Button>
-              </ContextMenu.Trigger>
-            </ContextMenu>
-          </Host>
-        </View>
-      )}
-
       {/* We've integrated the loading state and no results into the main suggestions component above */}
 
       <TouchableOpacity
@@ -467,6 +337,87 @@ export default function HomeScreen() {
         isLoading={isLoadingStationDetails}
         onClose={handleCloseBottomSheet}
       />
+
+      <View
+        style={{
+          position: "absolute",
+          top: Constants.statusBarHeight - 16,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          // backgroundColor: "red",
+        }}
+      >
+        <Host
+          matchContents
+          style={{
+            // flex: 1,
+            // backgroundColor: "blue",
+          }}
+        >
+          <VStack
+            alignment='leading'
+            modifiers={[
+              padding({ all: 16 }),
+            ]}
+          >
+            <HStack
+              alignment='center'
+              modifiers={[
+                // background("#FF0000"),
+                cornerRadius(10),
+                padding({ all: 8 }),
+                frame({ height: 40, alignment: "leading" }),
+                // shadow({ radius: 5, x: 0, y: 2 }),
+                glassEffect({
+                  glass: {
+                    variant: "regular",
+                    interactive: true,
+                  },
+                }),
+              ]}
+            >
+              <Image
+                systemName='magnifyingglass'/>
+              <TextField
+                modifiers={[padding({ leading: 8 })]}
+                autocorrection={false}
+                defaultValue="A single line text input"
+                onChangeText={() => { console.log("Text changed") }}
+              />
+            </HStack>
+            {/* Connector type filter with ContextMenu */}
+            {selectedConnectorType && (
+              <ContextMenu>
+                <ContextMenu.Items>
+                  <Button onPress={() => setSelectedConnectorType("TYPE2")}>
+                    Type 2
+                  </Button>
+                  <Button onPress={() => setSelectedConnectorType("CCS")}>
+                    CCS
+                  </Button>
+                </ContextMenu.Items>
+                <ContextMenu.Trigger>
+                  <Button
+                    variant="glass"
+                    modifiers={[padding({ top: 8 })]}
+                  >
+                    {selectedConnectorType === "TYPE2"
+                      ? "Type 2"
+                      : selectedConnectorType === "CCS"
+                      ? "CCS"
+                      : selectedConnectorType === "CHADEMO"
+                      ? "CHAdeMO"
+                      : selectedConnectorType === "TESLA"
+                      ? "Tesla"
+                      : "Unknown"}
+                  </Button>
+                </ContextMenu.Trigger>
+              </ContextMenu>
+            )}
+          </VStack>
+        </Host>
+      </View>
     </View>
   );
 }
