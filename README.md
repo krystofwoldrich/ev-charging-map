@@ -67,7 +67,7 @@ Settings → App versions can load **Stable** (`production`), **Preview** (`prev
 
 The selector uses Expo Updates request-header overrides, inspired by [euxy's channel surfing](https://github.com/brentvatne/euxy/blob/main/src/lib/channel-surf.ts). It checks compatibility, downloads the update, saves the selected channel, fully dismisses the native sheet, and then reloads. Failed checks/downloads restore the previous channel. An empty or incompatible channel never replaces the current version. No account token or App Store credentials are shipped in the app.
 
-Automatic update checks are disabled deliberately: the version you select stays loaded until you choose another update. Runtime version **1.1.0** identifies this native build. **Bump both the app version and runtime version whenever native dependencies or native configuration change**, regenerate native projects, and build new binaries. JavaScript-only updates can use the existing runtime.
+Automatic update checks are disabled deliberately: the version you select stays loaded until you choose another update. Runtime version **1.1.1** identifies this native build, including the generated charging-pin icon. **Bump both the app version and runtime version whenever native dependencies or native configuration change**, regenerate native projects, and build new binaries. JavaScript-only updates can use the existing runtime. The icon source prompt and asset details are in [docs/app-icon.md](docs/app-icon.md).
 
 ```sh
 # Publish a compatible preview (use a descriptive, signed message)
