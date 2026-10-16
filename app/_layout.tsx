@@ -3,12 +3,12 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { SettingsProvider } from '@/lib/settings';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -23,20 +23,12 @@ const queryClient = new QueryClient({
 // Create the AsyncStorage persister
 const asyncStoragePersister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: 'ev-charging-map-cache-v2',
+  key: 'ev-charging-map-cache-v3',
   throttleTime: 1000, // Throttle writes to avoid performance issues
 });
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -59,11 +51,13 @@ export default function RootLayout() {
         }}
       >
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <SettingsProvider>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />
+          </SettingsProvider>
         </ThemeProvider>
       </PersistQueryClientProvider>
     </GestureHandlerRootView>

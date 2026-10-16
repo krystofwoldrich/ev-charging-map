@@ -1,6 +1,8 @@
 # EV Charging Map
 
-An Expo SDK 58 app that displays charging stations, availability, and prices from the public Plugsurfing API. Address search and current location use Expo Location. iOS uses Apple Maps through `react-native-maps`.
+An Expo SDK 58 charging map with native, resizable Liquid Glass sheets for search, station details, and Settings. iOS uses Apple Maps through `react-native-maps`.
+
+**Sample data is enabled by default.** Settings → Use sample data switches between a fictional Amsterdam collection and the live public Plugsurfing API. Sample search and station details do not call the charging or geocoding APIs; map tiles still come from Apple Maps. Live address search and current location use Expo Location. The preference is saved on the device, and the two data sources have separate query caches.
 
 ## Local development
 
@@ -34,7 +36,7 @@ npm run export -- --platform ios
 npx expo-doctor
 ```
 
-`npm test` runs isolated API regression tests. `npm run check:api` makes real requests for stations and details in central Amsterdam; it fails if the public endpoint is unavailable or incompatible. No API key is currently required. Availability and prices are supplied by Plugsurfing and may change.
+`npm test` covers API errors, sample data, tariff/hours processing, and update-switch success and failure paths. `npm run check:api` makes real requests for stations and details in central Amsterdam; it fails if the public endpoint is unavailable or incompatible. No API key is currently required. Availability and prices are supplied by Plugsurfing and may change.
 
 On the simulator, verify launch, location permission, markers and station details, address search, Type 2/CCS filtering, current-location recentering, and error/retry behavior. Also verify launch with location permission denied.
 
@@ -49,8 +51,42 @@ npx eas-cli@25.0.0 build --platform ios --profile simulator
 # App Store-signed archive for TestFlight
 npx eas-cli@25.0.0 build --platform ios --profile production
 
+# Development client for iOS simulators
+npx eas-cli@25.0.0 build --platform ios --profile development-simulator
+
 # Development client for registered physical iOS devices
 npx eas-cli@25.0.0 build --platform ios --profile development
 ```
 
 The production and development profiles increment the remote build number. A production build does not submit itself to TestFlight; submission is a separate `eas submit` step. TestFlight uses App Store distribution, while the development client uses internal/ad hoc distribution.
+
+
+## Release version switching
+
+Settings → App versions can load **Stable** (`production`), **Preview** (`preview`), or a named channel. Custom channels become recent choices. This is available in the standalone simulator and TestFlight builds; development clients use Metro instead.
+
+The selector uses Expo Updates request-header overrides, inspired by [euxy's channel surfing](https://github.com/brentvatne/euxy/blob/main/src/lib/channel-surf.ts). It checks compatibility, downloads the update, saves the selected channel, fully dismisses the native sheet, and then reloads. Failed checks/downloads restore the previous channel. An empty or incompatible channel never replaces the current version. No account token or App Store credentials are shipped in the app.
+
+Automatic update checks are disabled deliberately: the version you select stays loaded until you choose another update. Runtime version **1.1.0** identifies this native build. **Bump both the app version and runtime version whenever native dependencies or native configuration change**, regenerate native projects, and build new binaries. JavaScript-only updates can use the existing runtime.
+
+```sh
+# Publish a compatible preview (use a descriptive, signed message)
+EXPO_PUBLIC_RELEASE_LABEL='Preview · Native sheets' npx eas-cli@25.0.0 update \
+  --channel preview --environment preview --platform ios \
+  --message 'Describe the change — author/model' --non-interactive
+
+# Publish the stable channel
+EXPO_PUBLIC_RELEASE_LABEL='Stable · Native sheets' npx eas-cli@25.0.0 update \
+  --channel production --environment production --platform ios \
+  --message 'Describe the change — author/model' --non-interactive
+
+# Submit the exact production build to the existing App Store Connect app
+npx eas-cli@25.0.0 submit --platform ios --profile production \
+  --id <production-build-id> --non-interactive --wait
+```
+
+## Interface design
+
+The shared TrueSheet uses the system's native sheet presentation and default Liquid Glass material on iOS 26+. Search, details, and Settings replace the sheet's content rather than stacking presentations. The map remains interactive at lower detents. System colors, SF Symbols, Dynamic Type, readable text, 44-point controls, and explicit availability labels follow Apple's guidance. Location permission is requested only when the live-mode location button is used. Missing opening hours remain unknown.
+
+References: [Expo's Apple Maps sheet guide](https://expo.dev/blog/how-to-create-apple-maps-style-liquid-glass-sheets), [TrueSheet Liquid Glass](https://sheet.lodev09.com/guides/liquid-glass), [Apple sheets](https://developer.apple.com/design/human-interface-guidelines/sheets), [search fields](https://developer.apple.com/design/human-interface-guidelines/search-fields), [materials](https://developer.apple.com/design/human-interface-guidelines/materials), [accessibility](https://developer.apple.com/design/human-interface-guidelines/accessibility), [typography](https://developer.apple.com/design/human-interface-guidelines/typography), and [Expo channel switching](https://docs.expo.dev/eas-update/channel-surfing/).

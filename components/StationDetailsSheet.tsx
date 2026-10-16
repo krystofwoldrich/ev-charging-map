@@ -1,422 +1,78 @@
-import { DetailedStation } from '@/api/stationDetails';
-import { useQueryClient } from '@tanstack/react-query';
-import { Ionicons } from '@expo/vector-icons';
-import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import React, { useCallback, useMemo, useRef } from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import type { ChargingStation } from '@/api/converters';
+import { useStationDetails } from '@/hooks/useStationDetail';
+import { useSettings } from '@/lib/settings';
+import { connectorName, priceLabel } from '@/lib/stationFormat';
+import React from 'react';
+import { ActivityIndicator, Alert, Linking, Platform, View, useWindowDimensions } from 'react-native';
+import { Action, Icon, Label, palette, Section, styles } from './ui/Native';
 
-interface StationDetailsSheetProps {
-  stationId: string | null;
-  stationDetails: DetailedStation | null;
-  isLoading: boolean;
-  onClose: () => void;
-}
-
-const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: StationDetailsSheetProps) => {
-  const queryClient = useQueryClient();
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
-  // Snap points for the bottom sheet (percentage from bottom of screen)
-  const snapPoints = useMemo(() => ['60%'], []);
-
-  // Callback for sheet changes
-  const handleSheetChanges = useCallback((index: number) => {
-    // If sheet is closed (index === -1), call the onClose callback
-    if (index === -1) {
-      onClose();
-    }
-  }, [onClose]);
-
-  // Function to format date to readable string
-  const formatDate = (timestamp: number | undefined) => {
-    if (!timestamp) return 'Never';
-
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  };
-
-  // Function to render connector status with icon
-  const renderConnectorStatus = (status: string) => {
-    const statusColors: Record<string, string> = {
-      'AVAILABLE': '#4CAF50',
-      'OCCUPIED': '#FF9800',
-      'OUT_OF_ORDER': '#F44336',
-      'UNKNOWN': '#9E9E9E'
-    };
-
-    const color = statusColors[status] || '#9E9E9E';
-
-    return (
-      <View style={styles.statusContainer}>
-        <View style={[styles.statusDot, { backgroundColor: color }]} />
-        <Text style={[styles.statusText, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-          {status.replace('_', ' ')}
-        </Text>
-      </View>
-    );
-  };
-
-  // Format price display
-  const formatPrice = (priceInfo: { price: number, currency: string, type: string } | undefined) => {
-    if (!priceInfo) return 'Not available';
-
-    const { price, currency, type } = priceInfo;
-
-    if (type === 'ENERGY') {
-      return `${price.toFixed(2)} ${currency}/kWh`;
-    } else if (type === 'TIME') {
-      return `${price.toFixed(2)} ${currency}/min`;
-    } else if (type === 'FLAT') {
-      return `${price.toFixed(2)} ${currency}`;
-    } else {
-      return `${price.toFixed(2)} ${currency}`;
-    }
-  };
-
-  // Render backdrop component
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        opacity={0}
-        enableTouchThrough={true}
-      />
-    ),
-    []
-  );
-
-  // Return null if there's no station selected
-  if (!stationId) {
-    return null;
+// Content of the shared native sheet. Keeping one presentation avoids stacked map sheets.
+export default function StationDetailsSheet({ station }: { station: ChargingStation }) {
+  const { source } = useSettings();
+  const { fontScale } = useWindowDimensions();
+  const largeText = fontScale > 1.4;
+  const { data, isLoading, isError, refetch } = useStationDetails(station.id, true);
+  const sample = source === 'sample';
+  async function directions() {
+    const { latitude, longitude } = station.coordinates;
+    const destination = `${latitude},${longitude}`;
+    const url = Platform.OS === 'ios'
+      ? `https://maps.apple.com/?${sample ? 'll' : 'daddr'}=${destination}&q=${encodeURIComponent(sample ? station.address || station.title : station.title)}${sample ? '' : '&dirflg=d'}`
+      : `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+    await Linking.openURL(url).catch(() => Alert.alert('Couldn’t open Maps', 'Please try again.'));
   }
-
-  return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      accessible={false}
-      index={0}
-      snapPoints={snapPoints}
-      onChange={handleSheetChanges}
-      backgroundStyle={{ backgroundColor: isDark ? '#1C1C1E' : '#FFFFFF' }}
-      handleIndicatorStyle={{ backgroundColor: isDark ? '#E5E5E7' : '#3C3C43' }}
-      backdropComponent={renderBackdrop}
-      enablePanDownToClose={true}
-      enableDynamicSizing={false}
-    >
-      {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={isDark ? '#FFFFFF' : '#007AFF'} />
-          <Text style={[styles.loadingText, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-            Loading station details...
-          </Text>
-        </View>
-      ) : stationDetails ? (
-        <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
-          {/* Header with station name and close button */}
-          <View style={styles.header}>
-            <Text style={[styles.stationName, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-              {stationDetails.name}
-            </Text>
-          </View>
-
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close station details" onPress={onClose} style={{ alignSelf: 'flex-end', padding: 12 }}>
-            <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
-          </TouchableOpacity>
-
-          {/* Station address */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="location" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-              <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Address
-              </Text>
+  if (isLoading) return <View style={{ padding: 30, gap: 14, alignItems: 'center' }}><ActivityIndicator /><Label style={styles.secondary}>Loading station details…</Label></View>;
+  if (isError || !data) return <View style={{ gap: 16 }}>
+    <Label>Station details aren’t available right now.</Label>
+    <Label style={styles.secondary}>Check your connection and try again.</Label>
+    <Action title="Try again" symbol="arrow.clockwise" onPress={() => void refetch()} />
+  </View>;
+  const price = priceLabel(data.lowestPrice);
+  const maxPower = Math.max(0, ...data.connectors.map(connector => connector.power));
+  return <View>
+    <View style={[styles.row, { marginBottom: 18 }]}>
+      <Icon name={data.availableConnectors ? 'checkmark.circle.fill' : 'clock.fill'} color={data.availableConnectors ? palette.green : palette.secondary} size={19} />
+      <Label style={{ fontWeight: '600' }}>{data.availableConnectors} of {data.totalConnectors} available</Label>
+    </View>
+    <View style={[styles.card, { flexDirection: largeText ? 'column' : 'row', paddingVertical: 18, marginBottom: 18, gap: largeText ? 18 : 0 }]}>
+      <View style={{ flex: largeText ? undefined : 1, paddingHorizontal: 18, gap: 5 }}>
+        <Label style={{ fontSize: 23, fontWeight: '700' }}>{maxPower ? `${maxPower} kW` : '—'}</Label>
+        <Label style={styles.caption}>Up to · {data.connectors.some(connector => connector.powerType === 'DC') ? 'Fast charging' : 'AC charging'}</Label>
+      </View>
+      {!largeText && <View style={{ width: 0.5, backgroundColor: palette.separator }} />}
+      <View style={{ flex: largeText ? undefined : 1, paddingHorizontal: 18, gap: 5 }}>
+        <Label style={{ fontSize: 23, fontWeight: '700' }}>{price?.split('/')[0] ?? '—'}</Label>
+        <Label style={styles.caption}>{price ? `From · per ${data.lowestPrice?.type === 'ENERGY' ? 'kWh' : 'session'}` : 'Price unavailable'}</Label>
+      </View>
+    </View>
+    <Action title={sample ? 'View area in Maps' : 'Directions'} symbol={sample ? 'map' : 'arrow.turn.up.right'} onPress={directions} />
+    {sample && <Label style={[styles.caption, { marginTop: 10 }]}>Sample station · Availability and prices are fictional.</Label>}
+    <Section title="Connectors">
+      <View style={styles.card}>
+        {data.connectors.map((connector, index) => <React.Fragment key={connector.id}>
+          {!!index && <View style={styles.divider} />}
+          <View style={styles.cardRow} accessible accessibilityLabel={`${connectorName(connector.type)}, ${connector.power} kilowatts, ${connector.status.toLowerCase()}, ${priceLabel(connector.priceInfo) || 'price unavailable'}`}>
+            <Icon name={connector.type === 'CCS' ? 'ev.plug.dc.ccs2' : 'powerplug'} size={26} color={palette.tint} />
+            <View style={{ flex: 1, gap: 4 }}>
+              <Label style={{ fontWeight: '600' }}>{connectorName(connector.type)} · {connector.power} kW</Label>
+              <Label style={styles.secondary}>{connector.status === 'AVAILABLE' ? 'Available' : connector.status === 'OCCUPIED' ? 'In use' : connector.status === 'OUT_OF_ORDER' ? 'Out of service' : 'Status unknown'}</Label>
+              {largeText && <Label style={styles.secondary}>{priceLabel(connector.priceInfo) || 'Price unavailable'}</Label>}
             </View>
-            <Text style={[styles.sectionContent, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-              {stationDetails.address.fullAddress}
-            </Text>
+            {!largeText && <Label style={[styles.secondary, { flexShrink: 1, textAlign: 'right' }]}>{priceLabel(connector.priceInfo) || '—'}</Label>}
           </View>
-
-          {/* Station operator */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="business" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-              <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Operator
-              </Text>
-            </View>
-            <Text style={[styles.sectionContent, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-              {stationDetails.operator.name}
-            </Text>
-            {stationDetails.isGreenEnergy && (
-              <View style={styles.greenEnergyContainer}>
-                <Ionicons name="leaf" size={16} color="#4CAF50" />
-                <Text style={styles.greenEnergyText}>Green Energy</Text>
-              </View>
-            )}
-          </View>
-
-          {/* Price information */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="cash" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-              <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Lowest Price
-              </Text>
-            </View>
-            <Text style={[styles.priceText, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-              {formatPrice(stationDetails.lowestPrice)}
-            </Text>
-          </View>
-
-          {/* Availability information */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="information-circle" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-              <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Availability
-              </Text>
-            </View>
-            <Text style={[styles.sectionContent, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-              {stationDetails.availableConnectors} of {stationDetails.totalConnectors} connectors available
-            </Text>
-            {renderConnectorStatus(stationDetails.status)}
-          </View>
-
-          {/* Connectors list */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="flash" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-              <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Connectors
-              </Text>
-            </View>
-            {stationDetails.connectors.map((connector, index) => (
-              <View key={connector.id} style={styles.connectorItem}>
-                <View style={styles.connectorHeader}>
-                  <Text style={[styles.connectorType, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                    {connector.type} - {connector.power}kW ({connector.powerType})
-                  </Text>
-                  {connector.isQuickCharge && (
-                    <View style={styles.quickChargeContainer}>
-                      <Ionicons name="flash" size={14} color="#FF9800" />
-                      <Text style={styles.quickChargeText}>Fast</Text>
-                    </View>
-                  )}
-                </View>
-                <View style={styles.connectorDetails}>
-                  {renderConnectorStatus(connector.status)}
-                  {connector.priceInfo && (
-                    <Text style={[styles.connectorPrice, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-                      {formatPrice(connector.priceInfo)}
-                    </Text>
-                  )}
-                </View>
-              </View>
-            ))}
-          </View>
-
-          {/* Last viewed information */}
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Ionicons name="time" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-              <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Last Updated
-              </Text>
-            </View>
-            <Text style={[styles.sectionContent, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-              {formatDate(stationDetails.lastUpdated)}
-            </Text>
-          </View>
-
-          {/* Opening times if available */}
-          {stationDetails.openingTimes && stationDetails.openingTimes.length > 0 && (
-            <View style={styles.section}>
-              <View style={styles.sectionHeader}>
-                <Ionicons name="calendar" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
-                <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                  Opening Hours
-                </Text>
-              </View>
-              {stationDetails.openingTimes.map((time, index) => (
-                <View key={index} style={styles.openingTimeItem}>
-                  <Text style={[styles.openingDay, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                    {time.day}:
-                  </Text>
-                  <Text style={[styles.openingHours, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-                    {time.hours}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </BottomSheetScrollView>
-      ) : (
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={32} color={isDark ? '#FF9800' : '#F44336'} />
-          <Text style={[styles.errorText, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-            Failed to load station details
-          </Text>
-          <TouchableOpacity
-            style={[styles.retryButton, { backgroundColor: isDark ? '#007AFF' : '#007AFF' }]}
-            onPress={() => queryClient.invalidateQueries({ queryKey: ['stationDetails', stationId] })}
-          >
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </BottomSheet>
-  );
-};
-
-const styles = StyleSheet.create({
-  contentContainer: {
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  errorText: {
-    marginTop: 12,
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  stationName: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginLeft: 8,
-  },
-  sectionContent: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  priceText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  statusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: 8,
-  },
-  statusText: {
-    fontSize: 16,
-  },
-  connectorItem: {
-    marginBottom: 12,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: 'rgba(150, 150, 150, 0.1)',
-  },
-  connectorHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  connectorType: {
-    fontSize: 16,
-    fontWeight: '600',
-    flex: 1,
-  },
-  quickChargeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 152, 0, 0.1)',
-    paddingVertical: 2,
-    paddingHorizontal: 6,
-    borderRadius: 4,
-  },
-  quickChargeText: {
-    fontSize: 12,
-    color: '#FF9800',
-    marginLeft: 2,
-  },
-  connectorDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  connectorPrice: {
-    fontSize: 14,
-  },
-  greenEnergyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  greenEnergyText: {
-    color: '#4CAF50',
-    marginLeft: 4,
-    fontSize: 14,
-  },
-  openingTimeItem: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  openingDay: {
-    width: 100,
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  openingHours: {
-    fontSize: 16,
-  },
-});
-
-export default StationDetailsSheet;
+        </React.Fragment>)}
+      </View>
+      {!sample && <Label style={styles.caption}>Prices are supplied by Plugsurfing. Parking, session, or time fees may also apply. Confirm the full tariff before charging.</Label>}
+    </Section>
+    <Section title="Location">
+      <View style={styles.card}>
+        <View style={styles.cardRow}><Icon name="mappin.and.ellipse" color={palette.secondary} /><View style={{ flex: 1, gap: 4 }}><Label>{data.address.street}</Label><Label style={styles.secondary}>{[data.address.postalCode, data.address.city].filter(Boolean).join(' ')}</Label></View></View>
+        <View style={styles.divider} />
+        <View style={styles.cardRow}><Icon name="building.2" color={palette.secondary} /><View style={{ flex: 1, gap: 4 }}><Label>{data.operator.name || 'Operator unavailable'}</Label><Label style={styles.caption}>Charging operator</Label></View></View>
+        <View style={styles.divider} />
+        <View style={styles.cardRow}><Icon name="clock" color={palette.secondary} /><View style={{ flex: 1, gap: 4 }}><Label>{data.openingTimes?.map(time => `${time.day}: ${time.hours}`).join('\n') || 'Opening hours unavailable'}</Label></View></View>
+      </View>
+    </Section>
+    {!sample && <Label style={[styles.caption, { marginTop: 22 }]}>Updated {new Date(data.lastUpdated).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} · Plugsurfing</Label>}
+  </View>;
+}

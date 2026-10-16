@@ -243,7 +243,7 @@ export const processStationDetails = (station: StationApiResponse): DetailedStat
           if (priceContent.segments && priceContent.segments.length > 0) {
             const segment = priceContent.segments[0];
             if (segment.price_components && segment.price_components.length > 0) {
-              const component = segment.price_components[0]; // Get first component for simplicity
+              const component = segment.price_components.find((value: StationPriceComponent) => value.type === 'ENERGY') ?? segment.price_components[0];
               if (typeof component.price === 'number') {
                 priceInfo = {
                   price: component.price,
@@ -281,45 +281,19 @@ export const processStationDetails = (station: StationApiResponse): DetailedStat
     }
   }
 
-  // If we didn't extract a lowest price earlier, use the standard method
-  if (!lowestPrice) {
-    lowestPrice = extractLowestPrice(station);
-  }
+  // Compare like tariff units, preferring energy prices over session or time fees.
+  lowestPrice = extractLowestPrice(station);
 
   // Create full address
   const fullAddress = `${station.address.street}, ${station.address.postalCode} ${station.address.city}, ${station.address.countryIsoCode}`;
 
-  // Parse opening hours if available
-  try {
-    // Try to extract opening hours from station data
-    if (station.extraProperties?.openingHours) {
-      openingTimes = [];
-      const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-      
-      // Parse available opening hours
-      daysOfWeek.forEach(day => {
-        const hours = station.extraProperties?.openingHours?.[day.toLowerCase()];
-        if (hours) {
-          openingTimes!.push({
-            day,
-            hours: typeof hours === 'string' ? hours : '24/7'
-          });
-        }
-      });
-    } 
-    
-    // If no opening hours were found, assume 24/7 for EV charging stations
-    if (!openingTimes || openingTimes.length === 0) {
-      openingTimes = [
-        { day: 'All days', hours: '24/7' }
-      ];
-    }
-  } catch (error) {
-    console.error('Error parsing opening hours:', error);
-    // Default to 24/7 as a fallback
-    openingTimes = [
-      { day: 'All days', hours: '24/7' }
-    ];
+  // Missing hours are unknown; never turn missing provider data into a 24/7 claim.
+  const hours = station.extraProperties?.openingHours;
+  if (hours) {
+    openingTimes = Object.entries(hours)
+      .filter((entry): entry is [string, string] => typeof entry[1] === 'string' && !!entry[1].trim())
+      .map(([day, value]) => ({ day: day.charAt(0).toUpperCase() + day.slice(1), hours: value }));
+    if (!openingTimes.length) openingTimes = undefined;
   }
 
   return {

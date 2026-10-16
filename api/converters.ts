@@ -13,6 +13,9 @@ export interface ChargingStation {
   priceType?: string;
   unit?: string;
   availability: string;
+  availableConnectors?: number;
+  totalConnectors?: number;
+  address?: string;
   power: string;
   lastUpdated?: number;
   hasPriceInfo?: boolean;
@@ -34,6 +37,9 @@ export const convertPlugsurfingToChargingStation = (locations: PlugsurfingLocati
       title: location.name,
       connectorTypes: [...new Set(connectors.map(connector => connector.connectorCategory))],
       availability: `${totalAvailable}/${totalConnectors} available`,
+      availableConnectors: totalAvailable,
+      totalConnectors,
+      address: [location.address?.street, location.address?.city].filter(Boolean).join(', '),
       power: Number.isFinite(maxPower) ? `${maxPower} kW` : 'Unknown power',
     };
   });

@@ -10,19 +10,30 @@
       "ios": {
         "image": "sdk-58"
       },
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "development"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
       "ios": {
         "image": "sdk-58"
-      }
+      },
+      "channel": "production"
     },
     "simulator": {
       "extends": "production",
+      "autoIncrement": false,
+      "ios": {
+        "simulator": true,
+        "image": "sdk-58"
+      }
+    },
+    "development-simulator": {
+      "extends": "development",
       "autoIncrement": false,
       "ios": {
         "simulator": true,

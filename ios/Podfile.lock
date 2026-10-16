@@ -3,6 +3,8 @@ PODS:
     - ReactNativeDependencies
   - DoubleConversion (1.1.6):
     - ReactNativeDependencies
+  - EASClient (58.0.2):
+    - ExpoModulesCore
   - EXConstants (58.0.12):
     - ExpoModulesCore
   - EXJSONUtils (58.0.1)
@@ -201,6 +203,36 @@ PODS:
     - React-RCTFabric
   - ExpoWebBrowser (58.0.6):
     - ExpoModulesCore
+  - EXStructuredHeaders (58.0.1)
+  - EXUpdates (58.0.17):
+    - EASClient
+    - EXManifests
+    - ExpoModulesCore
+    - EXStructuredHeaders
+    - EXUpdatesInterface
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - ReachabilitySwift
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-cxxstableapi
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - EXUpdatesInterface (58.0.1):
     - ExpoModulesCore
   - fast_float (8.0.0):
@@ -230,6 +262,7 @@ PODS:
     - FBLazyVector (= 0.88.0)
     - RCTRequired (= 0.88.0)
     - React-Core (= 0.88.0)
+  - ReachabilitySwift (5.2.4)
   - React (0.88.0):
     - React-Core (= 0.88.0)
     - React-Core/DevSupport (= 0.88.0)
@@ -2307,6 +2340,29 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNTrueSheet (3.11.18):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-bridging
+    - React-Core
+    - React-Core-prebuilt
+    - React-cxxstableapi
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - RNWorklets (0.13.0):
     - hermes-engine
     - RCTRequired
@@ -2389,6 +2445,7 @@ PODS:
 DEPENDENCIES:
   - boost (from `build/rndeps-facades/boost`)
   - DoubleConversion (from `build/rndeps-facades/DoubleConversion`)
+  - EASClient (from `../node_modules/expo-eas-client/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXJSONUtils (from `../node_modules/expo-json-utils/ios`)
   - EXManifests (from `../node_modules/expo-manifests/ios`)
@@ -2420,6 +2477,8 @@ DEPENDENCIES:
   - ExpoSystemUI (from `../node_modules/expo-system-ui/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
   - ExpoWebBrowser (from `../node_modules/expo-web-browser/ios`)
+  - EXStructuredHeaders (from `../node_modules/expo-structured-headers/ios`)
+  - EXUpdates (from `../node_modules/expo-updates/ios`)
   - EXUpdatesInterface (from `../node_modules/expo-updates-interface/ios`)
   - fast_float (from `build/rndeps-facades/fast_float`)
   - FBLazyVector (from `build/rncore-facades/FBLazyVector`)
@@ -2512,15 +2571,22 @@ DEPENDENCIES:
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - "RNTrueSheet (from `../node_modules/@lodev09/react-native-true-sheet`)"
   - RNWorklets (from `../node_modules/react-native-worklets`)
   - SocketRocket (from `build/rndeps-facades/SocketRocket`)
   - Yoga (from `build/rncore-facades/Yoga`)
+
+SPEC REPOS:
+  trunk:
+    - ReachabilitySwift
 
 EXTERNAL SOURCES:
   boost:
     :path: build/rndeps-facades/boost
   DoubleConversion:
     :path: build/rndeps-facades/DoubleConversion
+  EASClient:
+    :path: "../node_modules/expo-eas-client/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
   EXJSONUtils:
@@ -2583,6 +2649,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@expo/ui/ios"
   ExpoWebBrowser:
     :path: "../node_modules/expo-web-browser/ios"
+  EXStructuredHeaders:
+    :path: "../node_modules/expo-structured-headers/ios"
+  EXUpdates:
+    :path: "../node_modules/expo-updates/ios"
   EXUpdatesInterface:
     :path: "../node_modules/expo-updates-interface/ios"
   fast_float:
@@ -2766,6 +2836,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNTrueSheet:
+    :path: "../node_modules/@lodev09/react-native-true-sheet"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
   SocketRocket:
@@ -2776,6 +2848,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: 2a9d6e1d9873337543f08d9dbc007b288f4e113b
   DoubleConversion: e85e4faac763226bfd1cc4c6a98d8355149b27a5
+  EASClient: 6fcbaa6430883fd0fbda39928cd994d4116bfd50
   EXConstants: 8d855ca919f1ff90af258a07e9d5c2135b5bdc7c
   EXJSONUtils: d59bf6b18639752631a81818559b2675a46f99e2
   EXManifests: 4c2c92154197231d68ac1229056a089175f590e3
@@ -2807,6 +2880,8 @@ SPEC CHECKSUMS:
   ExpoSystemUI: 99fbb48d726a6bca0267d4bf636fa60c75e6ea00
   ExpoUI: 7d77da7f7a5473cb87d5b5a3cea47b1ac0e0d6cb
   ExpoWebBrowser: c1455dbe22ad3396275bb3343931fb328b3d17c4
+  EXStructuredHeaders: d38b81fb2ff838c15bf28135deb247e76293d2b9
+  EXUpdates: 3235d8575219fa3017d8b4a87084cc1fa5a2e816
   EXUpdatesInterface: c917c2087e6a9c0bf4d701fc073f2279efc79fd9
   fast_float: 908e5ee35999f3d91af4b962ac951acac591866c
   FBLazyVector: 953381a667ad5f4119b929026e53c4f3aa0da7e7
@@ -2819,6 +2894,7 @@ SPEC CHECKSUMS:
   RCTSwiftUI: 4b21ec5b1f86acb9c96bb429100ad88d4023ed76
   RCTSwiftUIWrapper: 118a21dd01e8000e0583f5f5660a815975aa9cf5
   RCTTypeSafety: 77078a9c26030dd84a6bdae74ed900159f89a098
+  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
   React: 8dafd0ef058191e9e7238cfa6b3deaa24398e5dd
   React-bridging: af8fb3f4aebda43f116b69d08384bc3058940b24
   React-callinvoker: 990aad7c20625b59200be77eea7f21f80280a9db
@@ -2898,6 +2974,7 @@ SPEC CHECKSUMS:
   RNGestureHandler: b435743b662a28149de03251a94cb8c8d7341fde
   RNReanimated: 02d6b0d54a0d4e9e02659f19be971935a371d12d
   RNScreens: edd28da703fa994ae9b63af0dc95ee4078ae0134
+  RNTrueSheet: 04c2755db1509ccbdc64e25cb098729765bba2d4
   RNWorklets: ec2adca24e3ce8d80b14b976cfe7b8d22b9d7682
   SocketRocket: d57b1af80c029e12a75cd9b218287c67381e4593
   Yoga: 58b502c52b14ad3c4468805d461fc37d275c2a42
