@@ -1,50 +1,56 @@
-# Welcome to your Expo app 👋
+# EV Charging Map
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An Expo SDK 58 app that displays charging stations, availability, and prices from the public Plugsurfing API. Address search and current location use Expo Location. iOS uses Apple Maps through `react-native-maps`.
 
-## Get started
+## Local development
 
-1. Install dependencies
+Use Node 22.13+, 24.3+, or 26+, and Xcode 27 for iOS 27.
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm ci
+npm run pod-install
+npm run ios -- --device <simulator-udid> --port 8087
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Use a dedicated simulator and an unused Metro port when other agents or projects are running. This app requires a native build; use the development client rather than Expo Go.
 
-## Learn more
+Native projects are checked in. After changing native dependencies or `app.json`, regenerate them and review the diff:
 
-To learn more about developing your project with Expo, look at the following resources:
+```sh
+npx expo prebuild --clean --no-install
+npm run pod-install
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+EAS builds the checked-in native projects rather than automatically applying app config. Expo Doctor warns about this intentionally retained workflow; keep app config and native files synchronized.
 
-## Join the community
+## Verification
 
-Join our community of developers creating universal apps.
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run check:api
+npm run export -- --platform ios
+npx expo-doctor
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+`npm test` runs isolated API regression tests. `npm run check:api` makes real requests for stations and details in central Amsterdam; it fails if the public endpoint is unavailable or incompatible. No API key is currently required. Availability and prices are supplied by Plugsurfing and may change.
+
+On the simulator, verify launch, location permission, markers and station details, address search, Type 2/CCS filtering, current-location recentering, and error/retry behavior. Also verify launch with location permission denied.
+
+## EAS builds
+
+The iOS bundle identifier is `ch.woldri.evchargingmap`, matching the existing App Store Connect app. The EAS project belongs to `krystofwoldrich`.
+
+```sh
+# Standalone iOS simulator app
+npx eas-cli@25.0.0 build --platform ios --profile simulator
+
+# App Store-signed archive for TestFlight
+npx eas-cli@25.0.0 build --platform ios --profile production
+
+# Development client for registered physical iOS devices
+npx eas-cli@25.0.0 build --platform ios --profile development
+```
+
+The production and development profiles increment the remote build number. A production build does not submit itself to TestFlight; submission is a separate `eas submit` step. TestFlight uses App Store distribution, while the development client uses internal/ad hoc distribution.

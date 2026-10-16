@@ -1,4 +1,5 @@
 import { DetailedStation } from '@/api/stationDetails';
+import { useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import React, { useCallback, useMemo, useRef } from 'react';
@@ -12,6 +13,7 @@ interface StationDetailsSheetProps {
 }
 
 const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: StationDetailsSheetProps) => {
+  const queryClient = useQueryClient();
   const bottomSheetRef = useRef<BottomSheet>(null);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -95,6 +97,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
   return (
     <BottomSheet
       ref={bottomSheetRef}
+      accessible={false}
       index={0}
       snapPoints={snapPoints}
       onChange={handleSheetChanges}
@@ -102,6 +105,7 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
       handleIndicatorStyle={{ backgroundColor: isDark ? '#E5E5E7' : '#3C3C43' }}
       backdropComponent={renderBackdrop}
       enablePanDownToClose={true}
+      enableDynamicSizing={false}
     >
       {isLoading ? (
         <View style={styles.loadingContainer}>
@@ -118,6 +122,10 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
               {stationDetails.name}
             </Text>
           </View>
+
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Close station details" onPress={onClose} style={{ alignSelf: 'flex-end', padding: 12 }}>
+            <Ionicons name="close" size={24} color={isDark ? '#FFFFFF' : '#000000'} />
+          </TouchableOpacity>
 
           {/* Station address */}
           <View style={styles.section}>
@@ -216,11 +224,11 @@ const StationDetailsSheet = ({ stationId, stationDetails, isLoading, onClose }: 
             <View style={styles.sectionHeader}>
               <Ionicons name="time" size={20} color={isDark ? '#FFFFFF' : '#000000'} />
               <Text style={[styles.sectionTitle, { color: isDark ? '#FFFFFF' : '#000000' }]}>
-                Last Viewed
+                Last Updated
               </Text>
             </View>
             <Text style={[styles.sectionContent, { color: isDark ? '#E5E5E7' : '#3C3C43' }]}>
-              {formatDate(stationDetails.lastViewed)}
+              {formatDate(stationDetails.lastUpdated)}
             </Text>
           </View>
 

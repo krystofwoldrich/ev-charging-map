@@ -1,18 +1,33 @@
 {
   "cli": {
-    "version": ">= 16.17.3",
+    "version": ">= 25.0.0",
     "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "ios": {
+        "image": "sdk-58"
+      },
+      "autoIncrement": true
     },
     "preview": {
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "image": "sdk-58"
+      }
+    },
+    "simulator": {
+      "extends": "production",
+      "autoIncrement": false,
+      "ios": {
+        "simulator": true,
+        "image": "sdk-58"
+      }
     }
   },
   "submit": {

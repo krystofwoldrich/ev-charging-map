@@ -1,5 +1,5 @@
 import { ChargingStation, convertPlugsurfingToChargingStation } from '@/api/converters';
-import { fetchChargingLocations } from '@/api/plugsurfing';
+import { ConnectorType, fetchChargingLocations } from '@/api/plugsurfing';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Region } from 'react-native-maps';
 
@@ -13,22 +13,22 @@ const MAX_STATIONS = 200;
  * @param region The current map region to fetch stations for
  * @returns Object containing charging stations array and loading/error states
  */
-export const useChargingStations = (region: Region | undefined) => {
+export const useChargingStations = (region: Region | undefined, connectorType?: ConnectorType | null) => {
   const queryClient = useQueryClient();
 
   // This query fetches data for the current region and merges it into a master list
-  const { isLoading, error, isError } = useQuery({
+  const { isLoading, error, isError, refetch } = useQuery({
     // The queryKey includes the region, so it refetches when the map moves
-    queryKey: ['chargingStations', region],
+    queryKey: ['chargingStations', region, connectorType],
     queryFn: async () => {
       if (!region) return [];
 
-      const locations = await fetchChargingLocations(region);
+      const locations = await fetchChargingLocations(region, connectorType);
       const newStations = convertPlugsurfingToChargingStation(locations);
 
       // Manually update the master list in the cache
       queryClient.setQueryData<Record<string, ChargingStation>>(['allStations'], (oldData) => {
-        const stationRecord = oldData || {};
+        const stationRecord = { ...oldData };
 
         // Add or update stations from the new batch
         newStations.forEach(station => {
@@ -92,12 +92,15 @@ export const useChargingStations = (region: Region | undefined) => {
 
   errorAllStations && console.error('Error reading all stations from cache:', errorAllStations);
 
-  const chargingStations = Object.values(allStationsRecord);
+  const chargingStations = Object.values(allStationsRecord).filter(station =>
+    !connectorType || station.connectorTypes?.includes(connectorType)
+  );
 
   return {
     chargingStations,
     isLoading,
     isError,
     error,
+    refetch,
   };
 };

@@ -124,15 +124,12 @@ export interface DetailedStation {
 // We've merged ExtendedStationDetails into DetailedStation
 
 export const fetchStationDetails = async (stationId: string): Promise<StationApiResponse | null> => {
-  const API_URL = `https://cdc-api.plugsurfing.com/public/v4/locations/${stationId}?userPrefix=ps-plugsurfing`;
+  const API_URL = `https://cdc-api.plugsurfing.com/public/v4/locations/${encodeURIComponent(stationId)}?userPrefix=ps-plugsurfing`;
 
   try {
     const response = await fetch(API_URL, {
       method: 'GET',
       headers: {
-        'Host': 'cdc-api.plugsurfing.com',
-        'User-Agent': 'Test/1234 CFNetwork/3826.500.131 Darwin/24.5.0',
-        'Connection': 'keep-alive',
         'Accept': 'application/json',
         'Accept-Language': 'en-GB,en;q=0.9',
         'Content-Type': 'application/json',
@@ -140,15 +137,17 @@ export const fetchStationDetails = async (stationId: string): Promise<StationApi
     });
 
     if (!response.ok) {
-      console.error(`Failed to fetch station details: ${response.status}`);
-      return null;
+      throw new Error(`Failed to fetch station details: ${response.status}`);
     }
 
     const data = await response.json();
+    if (!Array.isArray(data.evses) || !data.address || !data.summary) {
+      throw new Error('Unexpected station details response');
+    }
     return data;
   } catch (error) {
     console.error('Error fetching station details:', error);
-    return null;
+    throw error;
   }
 };
 

@@ -90,6 +90,8 @@ const StationMarker = ({ station, shouldFetchPrice, onPress }: StationMarkerProp
       coordinate={station.coordinates}
       centerOffset={{ x: 0, y: -15 }}
       identifier={station.id}
+      title={station.title}
+      accessibilityLabel={`${station.title}, ${station.availability}`}
       onPress={() => onPress?.(station.id)}
       tracksViewChanges={false}
     >
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    textOverflow: 'hidden',
+    overflow: 'hidden',
   },
   markerText: {
     color: 'white',
@@ -152,9 +154,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(StationMarker,
-  // Custom equality function for memo - check ID and shouldFetchPrice
-  (prevProps, nextProps) => {
-    return prevProps.station.id === nextProps.station.id &&
-           prevProps.shouldFetchPrice === nextProps.shouldFetchPrice;
-  });
+export default memo(StationMarker);

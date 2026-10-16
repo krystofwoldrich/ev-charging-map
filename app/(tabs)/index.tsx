@@ -12,7 +12,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useIsFetching } from "@tanstack/react-query";
 import { BlurView } from "expo-blur";
-import Constants from "expo-constants";
 import * as Location from "expo-location";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef, useState } from "react";
@@ -31,10 +30,10 @@ import MapView, { Region } from "react-native-maps";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChargingStation } from "../../api/converters";
 
-import { Button, ContextMenu, Host } from "@expo/ui/swift-ui";
-import { frame } from '@expo/ui/swift-ui/modifiers';
+import { Button, Menu, Host } from "@expo/ui/swift-ui";
+import { buttonStyle, frame } from '@expo/ui/swift-ui/modifiers';
 
-import { CornerStyle, ExpoLiquidGlassView, LiquidGlassType } from "expo-liquid-glass-view";
+import { GlassView } from "expo-glass-effect";
 
 export default function HomeScreen() {
   const mapViewRef = useRef<MapView>(null);
@@ -42,8 +41,7 @@ export default function HomeScreen() {
   const [initialRegion, setInitialRegion] = useState<Region | undefined>(
     undefined
   );
-  const [userLocation, setUserLocation] =
-    useState<Location.LocationObject | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(
@@ -61,7 +59,8 @@ export default function HomeScreen() {
     chargingStations,
     isLoading: isLoadingStations,
     isError,
-  } = useChargingStations(region);
+    refetch: refetchStations,
+  } = useChargingStations(region, selectedConnectorType);
 
   // Use our custom hook for current address
   const { currentAddress } = useCurrentAddress(region, { threshold: 1 }); // 1km threshold
@@ -81,37 +80,40 @@ export default function HomeScreen() {
     isZoomedIn && isStationInRegion(station, region);
 
   useEffect(() => {
+    let active = true;
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.error("Permission to access location was denied");
-        return;
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") return;
+        const location = await Location.getCurrentPositionAsync({});
+        if (!active) return;
+        const userRegion = {
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          ...getDistrictLevelDeltasForWindow(),
+        };
+        setInitialRegion(userRegion);
+        setRegion(userRegion);
+        mapViewRef.current?.animateToRegion(userRegion, 500);
+      } catch (error) {
+        console.warn("Current location unavailable; address search is still available", error);
       }
+    })();
+    return () => { active = false; };
+  }, []);
 
-      let location = await Location.getCurrentPositionAsync({});
-      setUserLocation(location);
-
-      const userRegion = {
+  const goToMyLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") return;
+      const location = await Location.getCurrentPositionAsync({});
+      mapViewRef.current?.animateToRegion({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
         ...getDistrictLevelDeltasForWindow(),
-      };
-
-      setInitialRegion(userRegion);
-      setRegion(userRegion); // Set region for initial data fetching
-    })();
-  }, []);
-
-  const goToMyLocation = () => {
-    if (userLocation) {
-      mapViewRef.current?.animateToRegion(
-        {
-          latitude: userLocation.coords.latitude,
-          longitude: userLocation.coords.longitude,
-          ...getDistrictLevelDeltasForWindow(),
-        },
-        1000
-      ); // 1000ms animation duration
+      }, 500);
+    } catch (error) {
+      console.warn("Current location unavailable", error);
     }
   };
 
@@ -156,7 +158,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
+      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
       <MapView
         ref={mapViewRef}
         style={styles.map}
@@ -184,15 +186,11 @@ export default function HomeScreen() {
         tint={'regular'}
         // intensity={90}
         // tint={colorScheme === "dark" ? "dark" : "light"}
-        style={styles.searchContainer}
+        style={[styles.searchContainer, { top: insets.top + 15 }]}
       > */}
-    <ExpoLiquidGlassView
-      cornerStyle={CornerStyle.Circular}
-      type={LiquidGlassType.Tint}
-
-      // tint="#000000"
-      cornerRadius={24}
-      style={styles.searchContainer}
+    <GlassView
+      glassEffectStyle="regular"
+      style={[styles.searchContainer, { top: insets.top + 15 }]}
       // style={{ width: 200, height: 200, alignSelf: "center", marginTop: 100 }}
     >
       <View
@@ -234,6 +232,8 @@ export default function HomeScreen() {
             {  flexGrow: 1 },
             { color: colorScheme === "dark" ? "white" : "black" },
           ]}
+          accessibilityLabel="Search address"
+          testID="address-search"
           placeholder={currentAddress || "Ionity, Nempitz, Germany"}
           placeholderTextColor={colorScheme === "dark" ? "#E5E5E7" : "#3C3C43"}
           cursorColor={colorScheme === "dark" ? "white" : "black"}
@@ -256,6 +256,7 @@ export default function HomeScreen() {
               clearSuggestions();
               setShowSuggestions(false);
             }}
+            accessibilityLabel="Clear search"
             style={styles.clearButton}
           >
             <Ionicons
@@ -267,7 +268,7 @@ export default function HomeScreen() {
         )}
               </View>
 
-        </ExpoLiquidGlassView>
+        </GlassView>
       {/* </BlurView> */}
 
       {/* Address suggestions */}
@@ -275,7 +276,7 @@ export default function HomeScreen() {
         <BlurView
           intensity={90}
           tint={colorScheme === "dark" ? "dark" : "light"}
-          style={styles.suggestionsContainer}
+          style={[styles.suggestionsContainer, { top: insets.top + 75 }]}
         >
           {suggestions.length > 0 && (
             <FlatList
@@ -354,45 +355,26 @@ export default function HomeScreen() {
         </BlurView>
       )}
 
-      {/* Connector type filter with ContextMenu */}
-      {!selectedStationId && selectedConnectorType && (
+      {/* Keep the connector menu clear of address suggestions. */}
+      {!showSuggestions && !selectedStationId && selectedConnectorType && (
         <View
           style={{
             // FIXME: Use MapOverlayContainer instead of absolute positioning
             position: "absolute",
-            top: 114,
+            top: insets.top + 70,
             left: 3,
           }}
         >
           <Host
             matchContents
           >
-            <ContextMenu>
-              <ContextMenu.Items>
-                <Button onPress={() => setSelectedConnectorType("TYPE2")}>
-                  Type 2
-                </Button>
-                <Button onPress={() => setSelectedConnectorType("CCS")}>
-                  CCS
-                </Button>
-              </ContextMenu.Items>
-              <ContextMenu.Trigger>
-                <Button
-                  variant="glass"
-                  modifiers={[frame({ height: 40, width: 100 })]}
-                >
-                  {selectedConnectorType === "TYPE2"
-                    ? "Type 2"
-                    : selectedConnectorType === "CCS"
-                    ? "CCS"
-                    : selectedConnectorType === "CHADEMO"
-                    ? "CHAdeMO"
-                    : selectedConnectorType === "TESLA"
-                    ? "Tesla"
-                    : "Unknown"}
-                </Button>
-              </ContextMenu.Trigger>
-            </ContextMenu>
+            <Menu
+              label={selectedConnectorType === "CCS" ? "CCS" : "Type 2"}
+              modifiers={[buttonStyle('glass'), frame({ height: 40, width: 100 })]}
+            >
+              <Button label="Type 2" onPress={() => setSelectedConnectorType("TYPE2")} />
+              <Button label="CCS" onPress={() => setSelectedConnectorType("CCS")} />
+            </Menu>
           </Host>
         </View>
       )}
@@ -404,6 +386,7 @@ export default function HomeScreen() {
           styles.locationButton,
           { bottom: insets.bottom + BOTTOM_OFFSET },
         ]}
+        accessibilityLabel="Go to my location"
         onPress={goToMyLocation}
       >
         <BlurView
@@ -451,11 +434,11 @@ export default function HomeScreen() {
             tint={colorScheme === "dark" ? "dark" : "light"}
             style={styles.statusBlur}
           >
-            <Ionicons
-              name="warning"
-              size={24}
-              color={colorScheme === "dark" ? "#FFD700" : "#FF6347"}
-            />
+            <TouchableOpacity accessibilityRole="button" onPress={() => refetchStations()}>
+              <Text style={{ color: colorScheme === "dark" ? "white" : "black" }}>
+                Unable to load stations. Tap to retry.
+              </Text>
+            </TouchableOpacity>
           </BlurView>
         </View>
       )}
@@ -520,10 +503,9 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     position: "absolute",
-    top: Constants.statusBarHeight + 15,
     left: 15,
     right: 15,
-    // flex: 1,
+    borderRadius: 24,
     flexDirection: "row",
     alignItems: "center",
     // borderRadius: 10,
@@ -543,7 +525,6 @@ const styles = StyleSheet.create({
   },
   suggestionsContainer: {
     position: "absolute",
-    top: Constants.statusBarHeight + 75, // Position below search bar
     left: 15,
     right: 15,
     maxHeight: 300,

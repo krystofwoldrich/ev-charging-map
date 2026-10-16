@@ -7,6 +7,7 @@ export interface ChargingStation {
     longitude: number;
   };
   title: string;
+  connectorTypes: string[];
   price?: number;
   currency?: string;
   priceType?: string;
@@ -31,8 +32,9 @@ export const convertPlugsurfingToChargingStation = (locations: PlugsurfingLocati
         longitude: location.longitude,
       },
       title: location.name,
+      connectorTypes: [...new Set(connectors.map(connector => connector.connectorCategory))],
       availability: `${totalAvailable}/${totalConnectors} available`,
-      power: `${maxPower} kW`,
+      power: Number.isFinite(maxPower) ? `${maxPower} kW` : 'Unknown power',
     };
   });
 };

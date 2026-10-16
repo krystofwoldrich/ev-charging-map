@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs } from 'expo-router/js-tabs';
 import React from 'react';
 
 import { HapticTab } from '@/components/HapticTab';
@@ -25,7 +25,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Map',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="map.fill" color={typeof color === 'string' ? color : Colors[colorScheme ?? 'light'].tint} />,
         }}
       />
     </Tabs>
