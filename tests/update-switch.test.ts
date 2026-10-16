@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { switchUpdateChannel, type UpdateSwitchDependencies } from '../lib/updateSwitch';
+import { switchUpdateChannel, updateErrorMessage, type UpdateSwitchDependencies } from '../lib/updateSwitch';
 
 function setup(overrides: Partial<UpdateSwitchDependencies> = {}) {
   const events: string[] = [];
@@ -69,4 +69,11 @@ test('invalid channels never reach the update service', async () => {
   const scenario = setup();
   await assert.rejects(switchUpdateChannel('../not a channel', null, scenario.deps), /Use letters/);
   assert.deepEqual(scenario.events, []);
+});
+
+test('update failures show useful recovery copy without raw service details', () => {
+  const missing = updateErrorMessage(new Error('HTTP 404: no channel named demo for project internal-id'), 'demo');
+  assert.match(missing, /channel “demo” couldn’t be found/);
+  assert.doesNotMatch(missing, /HTTP|internal-id/);
+  assert.match(updateErrorMessage(new Error('Native loader stack trace'), 'preview'), /Check your connection/);
 });

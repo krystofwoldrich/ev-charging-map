@@ -13,6 +13,14 @@ export function validChannel(channel: string) {
   return /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(channel);
 }
 
+export function updateErrorMessage(error: unknown, channel: string) {
+  const message = error instanceof Error ? error.message : '';
+  if (/404|no channel named/i.test(message)) {
+    return `The channel “${channel}” couldn’t be found. Check its name and try again. Your current version is unchanged.`;
+  }
+  return 'The new version couldn’t be loaded. Check your connection and try again. Your current version is unchanged.';
+}
+
 export async function switchUpdateChannel(channel: string, previous: string | null, deps: UpdateSwitchDependencies) {
   if (!validChannel(channel)) throw new Error('Use letters, numbers, dots, dashes, or underscores (up to 64 characters).');
   let committed = false;

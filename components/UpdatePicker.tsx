@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 import * as Updates from 'expo-updates';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, TextInput, View } from 'react-native';
-import { switchUpdateChannel, validChannel } from '@/lib/updateSwitch';
+import { switchUpdateChannel, updateErrorMessage, validChannel } from '@/lib/updateSwitch';
 import { Action, Icon, Label, palette, Section, styles } from './ui/Native';
 
 const CHANNEL_KEY = 'charging-map:update-channel';
@@ -56,7 +56,7 @@ export default function UpdatePicker({ dismissSheet, restoreSheet, onBusyChange 
       }
     } catch (error) {
       await restoreSheet().catch(() => {});
-      Alert.alert('Couldn’t switch versions', error instanceof Error ? error.message : 'Check your connection and try again.');
+      Alert.alert('Couldn’t switch versions', updateErrorMessage(error, target));
     } finally {
       busy.current = false;
       setProgress('');
@@ -85,7 +85,7 @@ export default function UpdatePicker({ dismissSheet, restoreSheet, onBusyChange 
         </React.Fragment>)}
       </View>
       <TextInput accessibilityLabel="Custom update channel" placeholder="Another channel…" placeholderTextColor={palette.secondary}
-        value={custom} onChangeText={setCustom} editable={!progress} autoCapitalize="none" autoCorrect={false}
+        value={custom} onChangeText={setCustom} editable={!progress} autoCapitalize="none" autoCorrect={false} returnKeyType="done"
         style={[styles.body, { backgroundColor: palette.fill, minHeight: 48, padding: 14, borderRadius: 14 }]} />
       <Action title={progress ? 'Updating…' : `Load ${target}`} symbol="arrow.down.circle" onPress={loadVersion} disabled={!!progress || !ready || !validChannel(target)} />
       {progress ? <View accessibilityLiveRegion="polite" style={styles.row}><ActivityIndicator /><Label style={styles.secondary}>{progress}</Label></View>
