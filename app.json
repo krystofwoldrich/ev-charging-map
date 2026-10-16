@@ -2,7 +2,7 @@
   "expo": {
     "name": "ev-charging-map",
     "slug": "ev-charging-map",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "evchargingmap",
@@ -12,7 +12,8 @@
       "bundleIdentifier": "ch.woldri.evchargingmap",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to display it on the map.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDisplayName": "EV Charging"
       },
       "config": {}
     },
@@ -67,6 +68,15 @@
         "projectId": "5f4b89ff-9896-4011-9124-cc04ff42ad73"
       }
     },
-    "owner": "krystofwoldrich"
+    "owner": "krystofwoldrich",
+    "runtimeVersion": "1.1.0",
+    "updates": {
+      "url": "https://u.expo.dev/5f4b89ff-9896-4011-9124-cc04ff42ad73",
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0,
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
+    }
   }
 }
