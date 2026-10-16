@@ -10,20 +10,21 @@ Use Node 22.13+, 24.3+, or 26+, and Xcode 27 for iOS 27.
 
 ```sh
 npm ci
-npm run pod-install
 npm run ios -- --device <simulator-udid> --port 8087
 ```
 
 Use a dedicated simulator and an unused Metro port when other agents or projects are running. This app requires a native build; use the development client rather than Expo Go.
 
-Native projects are checked in. After changing native dependencies or `app.json`, regenerate them and review the diff:
+Native projects use [Expo Continuous Native Generation](https://docs.expo.dev/workflow/continuous-native-generation/) and are ignored by Git. EAS generates them from `app.json`, `app.config.js`, and config plugins for the selected profile. Keep native customizations in config plugins, not generated files. The plain launch-screen fix lives in `plugins/withPlainLaunchScreen.js`.
+
+The local `start`, `ios`, `android`, and `prebuild` scripts select the development variant. After changing native dependencies/config, or switching from a locally generated release project, regenerate before compiling:
 
 ```sh
-npx expo prebuild --clean --no-install
-npm run pod-install
+npm run prebuild:clean
+npm run ios -- --device <simulator-udid> --port 8087
 ```
 
-EAS builds the checked-in native projects rather than automatically applying app config. Expo Doctor warns about this intentionally retained workflow; keep app config and native files synchronized.
+For an installed EAS dev client, start Metro with `npm start -- --port 8087`. Its `evchargingmap-dev` URL scheme opens only the dev app, even alongside older releases that registered Expo's generated scheme. To generate release native projects locally, use `npm run prebuild:production`; switch back with `npm run prebuild:clean` before running local dev builds.
 
 ## Verification
 
@@ -42,7 +43,14 @@ On the simulator, verify launch, location permission, markers and station detail
 
 ## EAS builds
 
-The iOS bundle identifier is `ch.woldri.evchargingmap`, matching the existing App Store Connect app. The EAS project belongs to `krystofwoldrich`.
+The EAS project belongs to `krystofwoldrich`. Development and release install side by side with independent app storage:
+
+| Variant | iOS bundle identifier | Android application ID | Icon |
+| --- | --- | --- | --- |
+| Release / TestFlight | `ch.woldri.evchargingmap` | `com.krystofwoldrich.evchargingmap` | Existing green charging pin |
+| EV Charging Dev | `ch.woldri.evchargingmap.dev` | `com.krystofwoldrich.evchargingmap.dev` | Purple charging pin with DEV badge |
+
+`development` and `development-simulator` set `APP_VARIANT=development`; production, simulator, and preview profiles retain the release identity. With no variable, config defaults to the unchanged release. The dev runtime is `1.1.1-dev`, separate from release OTA updates. This follows [Expo's app variant guidance](https://docs.expo.dev/build-reference/variants/).
 
 ```sh
 # Standalone iOS simulator app

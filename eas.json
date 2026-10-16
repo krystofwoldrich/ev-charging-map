@@ -5,6 +5,8 @@
   },
   "build": {
     "development": {
+      "environment": "development",
+      "env": { "APP_VARIANT": "development" },
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
@@ -14,10 +16,14 @@
       "channel": "development"
     },
     "preview": {
+      "environment": "preview",
+      "env": { "APP_VARIANT": "production" },
       "distribution": "internal",
       "channel": "preview"
     },
     "production": {
+      "environment": "production",
+      "env": { "APP_VARIANT": "production" },
       "autoIncrement": true,
       "ios": {
         "image": "sdk-58"
