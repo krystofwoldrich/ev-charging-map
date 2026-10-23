@@ -6,7 +6,7 @@ An Expo SDK 58 charging map with native, resizable Liquid Glass sheets for searc
 
 ## Local development
 
-Use Node 22.13+, 24.3+, or 26+, and Xcode 27 for iOS 27.
+Use Node 22.13+, 24.3+, or 26+, and Xcode 27.1 for iOS 27.1 and full-screen iPhone Duo support.
 
 ```sh
 npm ci
@@ -42,6 +42,8 @@ npx expo-doctor
 On the simulator, verify launch, location permission, markers and station details, address search, Type 2/CCS filtering, current-location recentering, and error/retry behavior. Also verify launch with location permission denied.
 
 ## EAS builds
+
+All iOS profiles pin `macos-tahoe-26.6-xcode-27.1` in `eas.json`, including the TestFlight release (`production`), standalone simulator release (`simulator`), and simulator development client (`development-simulator`). This selects Xcode 27.1 and the iOS 27.1 SDK instead of relying on a moving SDK alias. See [Expo's build image catalog](https://docs.expo.dev/build-reference/infrastructure/) when updating the toolchain.
 
 The EAS project belongs to `krystofwoldrich`. Development and release install side by side with independent app storage:
 

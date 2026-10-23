@@ -10,7 +10,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "image": "sdk-58"
+        "image": "macos-tahoe-26.6-xcode-27.1"
       },
       "autoIncrement": true,
       "channel": "development"
@@ -19,6 +19,9 @@
       "environment": "preview",
       "env": { "APP_VARIANT": "production" },
       "distribution": "internal",
+      "ios": {
+        "image": "macos-tahoe-26.6-xcode-27.1"
+      },
       "channel": "preview"
     },
     "production": {
@@ -26,7 +29,7 @@
       "env": { "APP_VARIANT": "production" },
       "autoIncrement": true,
       "ios": {
-        "image": "sdk-58"
+        "image": "macos-tahoe-26.6-xcode-27.1"
       },
       "channel": "production"
     },
@@ -35,7 +38,7 @@
       "autoIncrement": false,
       "ios": {
         "simulator": true,
-        "image": "sdk-58"
+        "image": "macos-tahoe-26.6-xcode-27.1"
       }
     },
     "development-simulator": {
@@ -43,7 +46,7 @@
       "autoIncrement": false,
       "ios": {
         "simulator": true,
-        "image": "sdk-58"
+        "image": "macos-tahoe-26.6-xcode-27.1"
       }
     }
   },
