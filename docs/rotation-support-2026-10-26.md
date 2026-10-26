@@ -41,6 +41,26 @@ All EAS iOS profiles remain pinned to `macos-tahoe-26.6-xcode-27.1`.
 Screenshots were captured with agent-device and are stored locally under
 `.expo/qa/rotation-fix-1.1.2/` (ignored build/QA artifacts).
 
+## EAS results
+
+All three builds of implementation commit `0607405` finished successfully using
+Xcode 27.1 (27A9275):
+
+- [Production / TestFlight](https://expo.dev/accounts/krystofwoldrich/projects/ev-charging-map/builds/fa0c229e-357c-4e6f-adf8-fc3e3f324d18)
+- [Release simulator](https://expo.dev/accounts/krystofwoldrich/projects/ev-charging-map/builds/2324e56c-9d21-4e9e-abaf-6f981909ce84)
+- [Development simulator](https://expo.dev/accounts/krystofwoldrich/projects/ev-charging-map/builds/d5bb8a78-252e-4d55-a877-321d13e3cc52)
+
+[EAS TestFlight submission](https://expo.dev/accounts/krystofwoldrich/projects/ev-charging-map/submissions/b3aa0592-1f3b-4231-ab04-91efdabe3cc8)
+finished successfully. This confirms submission, not Apple's processing or tester
+availability.
+
+Downloaded both simulator artifacts and verified their 1.1.2 version, separate
+bundle IDs, iOS 27.1 SDK, and four supported orientations in the compiled plists.
+Installed both on Duo. The standalone release launches without Metro and retains
+the corrected layout on both outer and inner screens after folding. EAS's
+nonblocking Expo Doctor check recommends newer SDK 58 patch dependencies; the
+builds retain the locally tested lockfile.
+
 ## Platform references
 
 - [Apple: supportedInterfaceOrientations](https://developer.apple.com/documentation/uikit/uiviewcontroller/supportedinterfaceorientations)
