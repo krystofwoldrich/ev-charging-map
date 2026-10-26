@@ -52,7 +52,7 @@ The EAS project belongs to `krystofwoldrich`. Development and release install si
 | Release / TestFlight | `ch.woldri.evchargingmap` | `com.krystofwoldrich.evchargingmap` | Existing green charging pin |
 | EV Charging Dev | `ch.woldri.evchargingmap.dev` | `com.krystofwoldrich.evchargingmap.dev` | Purple charging pin with DEV badge |
 
-`development` and `development-simulator` set `APP_VARIANT=development`; production, simulator, and preview profiles retain the release identity. With no variable, config defaults to the unchanged release. The dev runtime is `1.1.1-dev`, separate from release OTA updates. This follows [Expo's app variant guidance](https://docs.expo.dev/build-reference/variants/).
+`development` and `development-simulator` set `APP_VARIANT=development`; production, simulator, and preview profiles retain the release identity. With no variable, config defaults to the unchanged release. The dev runtime is `1.1.2-dev`, separate from release OTA updates. This follows [Expo's app variant guidance](https://docs.expo.dev/build-reference/variants/).
 
 ```sh
 # Standalone iOS simulator app
@@ -77,7 +77,7 @@ Settings → App versions can load **Stable** (`production`), **Preview** (`prev
 
 The selector uses Expo Updates request-header overrides, inspired by [euxy's channel surfing](https://github.com/brentvatne/euxy/blob/main/src/lib/channel-surf.ts). It checks compatibility, downloads the update, saves the selected channel, fully dismisses the native sheet, and then reloads. Failed checks/downloads restore the previous channel. An empty or incompatible channel never replaces the current version. No account token or App Store credentials are shipped in the app.
 
-Automatic update checks are disabled deliberately: the version you select stays loaded until you choose another update. Runtime version **1.1.1** identifies this native build, including the generated charging-pin icon. **Bump both the app version and runtime version whenever native dependencies or native configuration change**, regenerate native projects, and build new binaries. JavaScript-only updates can use the existing runtime. The icon source prompt and asset details are in [docs/app-icon.md](docs/app-icon.md).
+Automatic update checks are disabled deliberately: the version you select stays loaded until you choose another update. Runtime version **1.1.2** identifies this native build, including unrestricted app orientation preferences and the Duo safe-area layout. Actual rotation remains subject to the device and OS; see [rotation verification](docs/rotation-support-2026-10-26.md). **Bump both the app version and runtime version whenever native dependencies or native configuration change**, regenerate native projects, and build new binaries. JavaScript-only updates can use the existing runtime. The icon source prompt and asset details are in [docs/app-icon.md](docs/app-icon.md).
 
 ```sh
 # Publish a compatible preview (use a descriptive, signed message)

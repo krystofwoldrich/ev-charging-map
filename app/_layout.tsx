@@ -52,7 +52,7 @@ export default function RootLayout() {
       >
         <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <SettingsProvider>
-          <Stack>
+          <Stack screenOptions={{ orientation: 'all' }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
           </Stack>

@@ -21,6 +21,9 @@ export default function ChargingMap() {
   const { source } = useSettings();
   const insets = useSafeAreaInsets();
   const { height, fontScale } = useWindowDimensions();
+  // Keep results usable in short landscape/split windows without checking
+  // device orientation: the Duo's active window can resize independently.
+  const middleDetent = Math.min(0.9, Math.max(0.55, 400 / height));
   const map = useRef<MapView>(null);
   const sheet = useRef<TrueSheet>(null);
   const scroll = useRef<React.ComponentRef<typeof ScrollView>>(null);
@@ -161,7 +164,7 @@ export default function ChargingMap() {
         </Pressable>
       </GlassView>
     </SafeAreaView>
-    <TrueSheet ref={sheet} detents={[Math.min(0.38, Math.max(0.23, 0.23 * fontScale)), 0.55, 1]} initialDetentIndex={fontScale > 1.4 ? 2 : 1}
+    <TrueSheet ref={sheet} detents={[Math.min(0.38, Math.max(0.23, 0.23 * fontScale)), middleDetent, 1]} initialDetentIndex={fontScale > 1.4 ? 2 : 1}
       initialDetentAnimated={false} dismissible={false} dimmed={false} draggable={!updating} scrollable
       anchor="left" maxContentWidth={480} header={header} scrollableOptions={{ topScrollEdgeEffect: 'soft', bottomScrollEdgeEffect: 'soft' }}>
       <SafeAreaProvider>
